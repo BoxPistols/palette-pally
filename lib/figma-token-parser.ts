@@ -26,7 +26,7 @@ export function extractColorsFromFigmaTokens(data: any): ColorData[] {
       const lightPalette = data.palette.light
 
       // 主要なカラーロールを処理（primary, secondary, success, warning, error, info）
-      const colorRoles = ["primary", "secondary", "success", "warning", "error", "info"]
+      const colorRoles: Array<string> = ["primary", "secondary", "success", "warning", "error", "info"]
       colorRoles.forEach((role) => {
         if (lightPalette[role]) {
           // main, dark, light, lighter, contrastTextの構造を持つカラー
@@ -34,10 +34,12 @@ export function extractColorsFromFigmaTokens(data: any): ColorData[] {
             const colorValue = lightPalette[role].main.$value || lightPalette[role].main
             // 有効なHEXカラーコードかチェック
             if (typeof colorValue === "string" && /^#[0-9A-F]{6}$/i.test(colorValue)) {
+              // roleの型を適切に変換
+              const colorRole = (role === "error" ? "danger" : role) as ColorData["role"]
               extractedColors.push({
                 name: role,
                 value: colorValue,
-                role: role === "error" ? "danger" : role,
+                role: colorRole,
                 variations: {
                   main: colorValue,
                   dark: lightPalette[role].dark?.$value || lightPalette[role].dark,
@@ -51,10 +53,12 @@ export function extractColorsFromFigmaTokens(data: any): ColorData[] {
             // 単一のカラー値
             const colorValue = lightPalette[role].$value || lightPalette[role]
             if (typeof colorValue === "string" && /^#[0-9A-F]{6}$/i.test(colorValue)) {
+              // roleの型を適切に変換
+              const colorRole = (role === "error" ? "danger" : role) as ColorData["role"]
               extractedColors.push({
                 name: role,
                 value: colorValue,
-                role: role === "error" ? "danger" : role,
+                role: colorRole,
               })
             }
           }
@@ -309,5 +313,151 @@ export function flattenTypographyData(data: any): Record<string, any> {
   } catch (error) {
     console.error("Error flattening typography data:", error)
     return {}
+  }
+}
+
+// カラーデータをFigmaトークン形式に変換する関数
+export function convertColorsToFigmaTokens(colors: ColorData[]): any {
+  const figmaTokens: any = {
+    palette: {
+      light: {},
+    },
+  }
+
+  try {
+    // カラーをロール別にグループ化
+    const roleGroups: Record<string, ColorData[]> = {}
+    const textColors: ColorData[] = []
+    const backgroundColors: ColorData[] = []
+    const commonColors: ColorData[] = []
+    const greyColors: ColorData[] = []
+    const otherColors: ColorData[] = []
+
+    colors.forEach((color) => {
+      // グループ別に分類
+      if (color.group === "text") {
+        textColors.push(color)
+      } else if (color.group === "background") {
+        backgroundColors.push(color)
+      } else if (color.group === "common") {
+        commonColors.push(color)
+      } else if (color.group === "grey") {
+        greyColors.push(color)
+      } else if (color.role) {
+        // ロールがある場合はロールごとにグループ化
+        if (!roleGroups[color.role]) {
+          roleGroups[color.role] = []
+        }
+        roleGroups[color.role].push(color)
+      } else {
+        otherColors.push(color)
+      }
+    })
+
+    // 主要なカラーロールを処理
+    Object.entries(roleGroups).forEach(([role, colorList]) => {
+      const color = colorList[0] // 最初のカラーを使用
+
+      // variationsがある場合は展開
+      if (color.variations) {
+        figmaTokens.palette.light[role] = {}
+
+        Object.entries(color.variations).forEach(([key, value]) => {
+          if (value && typeof value === "string") {
+            figmaTokens.palette.light[role][key] = {
+              $value: value,
+              $type: "color",
+            }
+          }
+        })
+      } else {
+        // 単一のカラー値
+        figmaTokens.palette.light[role] = {
+          main: {
+            $value: color.value,
+            $type: "color",
+          },
+        }
+      }
+    })
+
+    // テキストカラー
+    if (textColors.length > 0) {
+      figmaTokens.palette.light.text = {}
+      textColors.forEach((color) => {
+        const key = color.name.replace("text-", "")
+        figmaTokens.palette.light.text[key] = {
+          $value: color.value,
+          $type: "color",
+        }
+      })
+    }
+
+    // バックグラウンドカラー
+    if (backgroundColors.length > 0) {
+      figmaTokens.palette.light.background = {}
+      backgroundColors.forEach((color) => {
+        const key = color.name.replace("background-", "")
+        figmaTokens.palette.light.background[key] = {
+          $value: color.value,
+          $type: "color",
+        }
+      })
+    }
+
+    // 共通カラー
+    if (commonColors.length > 0) {
+      figmaTokens.palette.light.common = {}
+      commonColors.forEach((color) => {
+        const key = color.name.replace("common-", "")
+        figmaTokens.palette.light.common[key] = {
+          $value: color.value,
+          $type: "color",
+        }
+      })
+    }
+
+    // グレースケール
+    if (greyColors.length > 0) {
+      figmaTokens.palette.grey = {}
+      greyColors.forEach((color) => {
+        const key = color.name.replace("grey-", "")
+        figmaTokens.palette.grey[key] = {
+          $value: color.value,
+          $type: "color",
+        }
+      })
+    }
+
+    // その他のカラー（figma名前空間に配置）
+    if (otherColors.length > 0) {
+      if (!figmaTokens.figma) {
+        figmaTokens.figma = {}
+      }
+      otherColors.forEach((color) => {
+        // グループがある場合はネストして配置
+        if (color.group && color.group.startsWith("figma")) {
+          const groupName = color.group.replace("figma-", "")
+          if (!figmaTokens.figma[groupName]) {
+            figmaTokens.figma[groupName] = {}
+          }
+          const key = color.name.replace(`figma-${groupName}-`, "")
+          figmaTokens.figma[groupName][key] = {
+            $value: color.value,
+            $type: "color",
+          }
+        } else {
+          figmaTokens.figma[color.name] = {
+            $value: color.value,
+            $type: "color",
+          }
+        }
+      })
+    }
+
+    return figmaTokens
+  } catch (error) {
+    console.error("Error converting colors to Figma tokens:", error)
+    return figmaTokens
   }
 }

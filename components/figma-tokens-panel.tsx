@@ -16,6 +16,7 @@ import {
   extractColorsFromFigmaTokens,
   extractTypographyFromFigmaTokens,
   flattenTypographyData,
+  convertColorsToFigmaTokens,
 } from "@/lib/figma-token-parser"
 import { TypographyPreview } from "@/components/typography-preview"
 import {
@@ -346,43 +347,33 @@ export function FigmaTokensPanel({ colors, onImport, onTypographyImport }: Figma
   }
 
   const handleExport = () => {
-    // 現在の日本時間を取得（ローカル時間を使用）
-    const now = new Date()
-    const year = now.getFullYear().toString().slice(-2) // 年の下2桁
-    const month = String(now.getMonth() + 1).padStart(2, "0")
-    const day = String(now.getDate()).padStart(2, "0")
-    const hours = String(now.getHours()).padStart(2, "0")
-    const minutes = String(now.getMinutes()).padStart(2, "0")
+    // 現在のカラーデータをFigmaトークン形式に変換
+    const figmaTokens = convertColorsToFigmaTokens(colors)
 
-    const timestamp = `${year}${month}${day}-${hours}${minutes}`
+    // タイムスタンプの生成
+    const now = new Date()
+    const timestamp = now.toISOString().slice(0, 10)
 
     // ファイル名の生成
-    let filename = `palette-pally-${timestamp}.json`
+    const filename = `figma-tokens-export-${timestamp}.json`
 
-    // インポートされたファイル名に基づいてファイル名を生成
-    if (parsedData && parsedData.$metadata && parsedData.$metadata.fileName) {
-      const originalName = parsedData.$metadata.fileName
-      if (originalName.includes("text.styles")) {
-        filename = `palette-pally-text.styles.tokens-${timestamp}.json`
-      } else if (originalName.includes("variableCollection.dark")) {
-        filename = `palette-pally-variableCollection.dark.tokens-${timestamp}.json`
-      } else if (originalName.includes("variableCollection.light")) {
-        filename = `palette-pally-variableCollection.light.tokens-${timestamp}.json`
-      }
-    }
-
-    const jsonString = JSON.stringify(exportData, null, 2)
+    const jsonString = JSON.stringify(figmaTokens, null, 2)
     const blob = new Blob([jsonString], { type: "application/json" })
     const url = URL.createObjectURL(blob)
 
     const a = document.createElement("a")
     a.href = url
-    // ファイル名にfigma-prefixを追加
-    a.download = `figma-tokens-export-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+
+    // エクスポート成功メッセージ
+    toast({
+      title: language === "jp" ? "エクスポート完了" : "Export completed",
+      description: language === "jp" ? `${filename}をダウンロードしました` : `Downloaded ${filename}`,
+    })
   }
 
   const renderModalContent = () => {
@@ -721,7 +712,9 @@ export function FigmaTokensPanel({ colors, onImport, onTypographyImport }: Figma
                 isFullscreen ? "fixed inset-0 z-50 bg-background p-6 overflow-auto" : "max-h-[80vh] overflow-auto"
               }`}
             >
-              <pre className="text-xs font-mono whitespace-pre">{JSON.stringify(exportData, null, 2)}</pre>
+              <pre className="text-xs font-mono whitespace-pre">
+                {JSON.stringify(convertColorsToFigmaTokens(colors), null, 2)}
+              </pre>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPreview(false)}>
