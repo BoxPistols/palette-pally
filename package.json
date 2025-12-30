@@ -29,7 +29,7 @@
     "react-beautiful-dnd": "latest",
     "react-colorful": "latest",
     "react-dom": "^18",
-    "react-resizable-panels": "latest",
+    "react-resizable-panels": "^3.0.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7"
   },
