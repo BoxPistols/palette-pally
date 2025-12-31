@@ -1,9 +1,11 @@
 export interface ColorData {
   name: string
-  value: string
+  value: string // Light theme value (default)
+  darkValue?: string // Dark theme value (if different from light)
   role?: ColorRole
   group?: string
-  variations?: Record<string, string>
+  variations?: Record<string, string> // Light theme variations
+  darkVariations?: Record<string, string> // Dark theme variations
 }
 
 export interface PaletteType {

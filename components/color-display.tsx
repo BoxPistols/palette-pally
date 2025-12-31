@@ -6,6 +6,7 @@ import { AlertTriangle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { findClosestTailwindColor, findClosestMaterialColor } from "@/lib/color-systems"
 import { useLanguage } from "@/contexts/language-context"
+import { useTheme } from "@/contexts/theme-context"
 import type { TextColorSettings, ColorRole } from "@/types/palette"
 import type { ColorMode } from "@/lib/color-systems"
 import { RoleColorSettings } from "./role-color-settings"
@@ -14,6 +15,7 @@ import { getRoleBadgeClass, getRoleDisplayName, getGroupBadgeClass } from "@/lib
 interface ColorDisplayProps {
   colorKey: string
   variations: Record<string, string>
+  darkVariations?: Record<string, string> // ダークモード用バリエーション
   textColorSettings: TextColorSettings
   isPrimary?: boolean
   colorMode: ColorMode
@@ -22,6 +24,7 @@ interface ColorDisplayProps {
   colorRole?: ColorRole
   group?: string
   customVariations?: Record<string, string>
+  customDarkVariations?: Record<string, string> // ダークモード用カスタムバリエーション
   disableVariationGeneration?: boolean
   color?: any // TODO: Define type
   onColorChange?: (updatedColor: any) => void // TODO: Define type
@@ -31,6 +34,7 @@ interface ColorDisplayProps {
 export function ColorDisplay({
   colorKey,
   variations,
+  darkVariations,
   textColorSettings,
   isPrimary = false,
   colorMode,
@@ -39,12 +43,14 @@ export function ColorDisplay({
   colorRole,
   group,
   customVariations,
+  customDarkVariations,
   disableVariationGeneration = false,
   color,
   onColorChange,
   onNameChange,
 }: ColorDisplayProps) {
   const { language } = useLanguage()
+  const { theme } = useTheme()
 
   // カラーロールの表示名を取得
   const getLocalizedRoleDisplayName = (role?: ColorRole): string => {
@@ -77,8 +83,17 @@ export function ColorDisplay({
     return name
   }
 
-  // カスタムバリエーションがある場合はそれを使用し、なければ通常のバリエーションを使用
-  const displayVariations = customVariations || variations
+  // テーマに応じたバリエーションを選択
+  const isDarkMode = theme === "dark"
+
+  // Light mode: カスタムバリエーションがある場合はそれを使用し、なければ通常のバリエーションを使用
+  const lightDisplayVariations = customVariations || variations
+
+  // Dark mode: カスタムダークバリエーション > ダークバリエーション > ライトバリエーション（フォールバック）
+  const darkDisplayVariations = customDarkVariations || darkVariations || lightDisplayVariations
+
+  // 現在のテーマに基づいてバリエーションを選択
+  const displayVariations = isDarkMode ? darkDisplayVariations : lightDisplayVariations
 
   // バリエーション生成を無効にする場合は、mainのみを表示
   const finalVariations =

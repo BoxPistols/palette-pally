@@ -157,8 +157,10 @@ interface ColorPickerProps {
   index: number
   name: string
   color: string
+  darkColor?: string // ダークモード用の色
   isPrimary?: boolean
   onColorChange: (color: string) => void
+  onDarkColorChange?: (color: string) => void // ダークモード用の色変更
   onNameChange: (name: string) => void
   onSetAsPrimary?: () => void
   dragHandleProps?: any
@@ -175,25 +177,33 @@ export function ColorPicker({
   index,
   name,
   color,
+  darkColor,
   isPrimary = false,
   onColorChange,
+  onDarkColorChange,
   onNameChange,
   onSetAsPrimary,
   dragHandleProps,
   colorRole,
 }: ColorPickerProps) {
-  const [inputValue, setInputValue] = useState(color)
+  const { language } = useLanguage()
+  const { theme } = useTheme()
+
+  // 現在のテーマに応じた表示色を決定
+  const isDarkMode = theme === "dark"
+  const displayColor = isDarkMode ? (darkColor || color) : color
+  const handleCurrentColorChange = isDarkMode ? (onDarkColorChange || onColorChange) : onColorChange
+
+  const [inputValue, setInputValue] = useState(displayColor)
   const [nameValue, setNameValue] = useState(name)
   const [rgbValues, setRgbValues] = useState({ r: 0, g: 0, b: 0 })
   const [hslValues, setHslValues] = useState({ h: 0, s: 0, l: 0 })
   const [oklabValues, setOklabValues] = useState({ l: 0, a: 0, b: 0 })
-  const { language } = useLanguage()
-  const { theme } = useTheme()
 
   useEffect(() => {
-    setInputValue(color)
-    updateColorValues(color)
-  }, [color])
+    setInputValue(displayColor)
+    updateColorValues(displayColor)
+  }, [displayColor])
 
   useEffect(() => {
     setNameValue(name)
@@ -222,7 +232,7 @@ export function ColorPicker({
 
     // Validate hex color
     if (/^#[0-9A-F]{6}$/i.test(value)) {
-      onColorChange(value)
+      handleCurrentColorChange(value)
     }
   }
 
@@ -234,7 +244,7 @@ export function ColorPicker({
 
   const handlePickerChange = (newColor: string) => {
     setInputValue(newColor)
-    onColorChange(newColor)
+    handleCurrentColorChange(newColor)
   }
 
   const handleRgbChange = (channel: "r" | "g" | "b", value: string) => {
@@ -244,7 +254,7 @@ export function ColorPicker({
       const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b)
       setRgbValues(newRgb)
       setInputValue(newHex)
-      onColorChange(newHex)
+      handleCurrentColorChange(newHex)
     }
   }
 
@@ -263,7 +273,7 @@ export function ColorPicker({
       const newHex = hslToHex(newHsl.h, newHsl.s, newHsl.l)
       setHslValues(newHsl)
       setInputValue(newHex)
-      onColorChange(newHex)
+      handleCurrentColorChange(newHex)
     }
   }
 
@@ -285,7 +295,7 @@ export function ColorPicker({
         const newHex = oklabToHex(newOklab.l, newOklab.a, newOklab.b)
         setOklabValues(newOklab)
         setInputValue(newHex)
-        onColorChange(newHex)
+        handleCurrentColorChange(newHex)
       } catch (error) {
         console.error("Error converting Oklab to hex:", error)
       }
@@ -295,7 +305,7 @@ export function ColorPicker({
   const handleBlur = () => {
     // Ensure color is valid on blur
     if (!/^#[0-9A-F]{6}$/i.test(inputValue)) {
-      setInputValue(color)
+      setInputValue(displayColor)
     }
   }
 
@@ -350,13 +360,18 @@ export function ColorPicker({
         </div>
 
         <div onMouseDown={handlePickerMouseDown}>
-          <HexColorPicker color={color} onChange={handlePickerChange} className="w-full" />
+          <HexColorPicker color={displayColor} onChange={handlePickerChange} className="w-full" />
+        </div>
+
+        {/* テーマ表示インジケーター */}
+        <div className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 py-1">
+          {isDarkMode ? "🌙 ダークモード編集中" : "☀️ ライトモード編集中"}
         </div>
 
         <div className="flex justify-between items-center mt-1 mb-1">
-          <ColorSuggestions baseColor={color} onSelectColor={onColorChange} />
+          <ColorSuggestions baseColor={displayColor} onSelectColor={handleCurrentColorChange} />
           {(() => {
-            const { contrast, level } = getContrastInfo(color, colorRole, theme)
+            const { contrast, level } = getContrastInfo(displayColor, colorRole, theme)
 
             // レベルに応じたバッジの色を設定
             const levelColor =
@@ -386,7 +401,7 @@ export function ColorPicker({
                 >
                   {contrast.toFixed(1)}:1
                 </span>
-                <A11yInfo color={color} colorRole={colorRole} />
+                <A11yInfo color={displayColor} colorRole={colorRole} />
               </>
             )
           })()}

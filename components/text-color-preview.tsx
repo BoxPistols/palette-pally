@@ -12,8 +12,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { calculateContrastRatio, getWCAGLevel } from "@/lib/color-utils"
+import { calculateContrastRatio, getWCAGLevel, generateDarkModeColor } from "@/lib/color-utils"
 import { useLanguage } from "@/contexts/language-context"
+import { useTheme } from "@/contexts/theme-context"
 import type { ColorData } from "@/types/palette"
 
 interface TextColorPreviewProps {
@@ -22,7 +23,17 @@ interface TextColorPreviewProps {
 
 export function TextColorPreview({ colors }: TextColorPreviewProps) {
   const { language, t } = useLanguage()
+  const { theme } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
+
+  // 現在のテーマに応じた色を取得
+  const isDarkMode = theme === "dark"
+  const getDisplayColor = (color: ColorData) => {
+    if (isDarkMode) {
+      return color.darkValue || generateDarkModeColor(color.value)
+    }
+    return color.value
+  }
 
   // 背景色のオプション
   const backgroundOptions = [
@@ -70,7 +81,12 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-[960px] w-[90vw] max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader className="sticky top-0 z-10 pb-4 border-b">
-            <DialogTitle>{t("textPreview.title")}</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle>{t("textPreview.title")}</DialogTitle>
+              <span className="text-xs text-gray-500 dark:text-gray-400 mr-8">
+                {isDarkMode ? "🌙 ダークモード" : "☀️ ライトモード"}
+              </span>
+            </div>
             <DialogDescription>{t("textPreview.description")}</DialogDescription>
           </DialogHeader>
 
@@ -101,7 +117,8 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                 <TabsContent value="standard" className="mt-0">
                   <div className="space-y-6">
                     {colors.map((color) => {
-                      const contrastRatio = calculateContrastRatio(selectedBackground, color.value)
+                      const displayColor = getDisplayColor(color)
+                      const contrastRatio = calculateContrastRatio(selectedBackground, displayColor)
                       const wcagLevel = getWCAGLevel(contrastRatio)
                       const contrastBadgeClass = getContrastBadgeClass(contrastRatio)
 
@@ -112,7 +129,7 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                               className="text-sm font-medium"
                               style={{ color: selectedBackground === "#FFFFFF" ? "#000000" : "#FFFFFF" }}
                             >
-                              {color.name} ({color.value})
+                              {color.name} ({displayColor})
                             </span>
                             <div className="flex items-center gap-1">
                               <span
@@ -130,12 +147,12 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <p className="text-base" style={{ color: color.value }}>
+                            <p className="text-base" style={{ color: displayColor }}>
                               {language === "jp"
                                 ? `標準テキスト (16px) - これは${color.name}色を使用したテキストです。`
                                 : `Standard text (16px) - This is text using the ${color.name} color.`}
                             </p>
-                            <p className="text-sm" style={{ color: color.value }}>
+                            <p className="text-sm" style={{ color: displayColor }}>
                               {language === "jp"
                                 ? `小さいテキスト (14px) - これは${color.name}色を使用したテキストです。`
                                 : `Small text (14px) - This is text using the ${color.name} color.`}
@@ -150,7 +167,8 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                 <TabsContent value="heading" className="mt-0">
                   <div className="space-y-8">
                     {colors.map((color) => {
-                      const contrastRatio = calculateContrastRatio(selectedBackground, color.value)
+                      const displayColor = getDisplayColor(color)
+                      const contrastRatio = calculateContrastRatio(selectedBackground, displayColor)
                       const wcagLevel = getWCAGLevel(contrastRatio)
                       const contrastBadgeClass = getContrastBadgeClass(contrastRatio)
 
@@ -161,7 +179,7 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                               className="text-sm font-medium"
                               style={{ color: selectedBackground === "#FFFFFF" ? "#000000" : "#FFFFFF" }}
                             >
-                              {color.name} ({color.value})
+                              {color.name} ({displayColor})
                             </span>
                             <div className="flex items-center gap-1">
                               <span
@@ -178,16 +196,16 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                               </span>
                             </div>
                           </div>
-                          <h1 className="text-4xl font-bold" style={{ color: color.value }}>
+                          <h1 className="text-4xl font-bold" style={{ color: displayColor }}>
                             {language === "jp" ? "見出し1 (32px)" : "Heading 1 (32px)"}
                           </h1>
-                          <h2 className="text-3xl font-bold" style={{ color: color.value }}>
+                          <h2 className="text-3xl font-bold" style={{ color: displayColor }}>
                             {language === "jp" ? "見出し2 (24px)" : "Heading 2 (24px)"}
                           </h2>
-                          <h3 className="text-2xl font-bold" style={{ color: color.value }}>
+                          <h3 className="text-2xl font-bold" style={{ color: displayColor }}>
                             {language === "jp" ? "見出し3 (20px)" : "Heading 3 (20px)"}
                           </h3>
-                          <h4 className="text-xl font-bold" style={{ color: color.value }}>
+                          <h4 className="text-xl font-bold" style={{ color: displayColor }}>
                             {language === "jp" ? "見出し4 (18px)" : "Heading 4 (18px)"}
                           </h4>
                         </div>
@@ -199,7 +217,8 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                 <TabsContent value="paragraph" className="mt-0">
                   <div className="space-y-8">
                     {colors.map((color) => {
-                      const contrastRatio = calculateContrastRatio(selectedBackground, color.value)
+                      const displayColor = getDisplayColor(color)
+                      const contrastRatio = calculateContrastRatio(selectedBackground, displayColor)
                       const wcagLevel = getWCAGLevel(contrastRatio)
                       const contrastBadgeClass = getContrastBadgeClass(contrastRatio)
 
@@ -210,7 +229,7 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                               className="text-sm font-medium"
                               style={{ color: selectedBackground === "#FFFFFF" ? "#000000" : "#FFFFFF" }}
                             >
-                              {color.name} ({color.value})
+                              {color.name} ({displayColor})
                             </span>
                             <div className="flex items-center gap-1">
                               <span
@@ -228,12 +247,12 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                             </div>
                           </div>
                           <div className="space-y-4">
-                            <p className="text-base" style={{ color: color.value }}>
+                            <p className="text-base" style={{ color: displayColor }}>
                               {language === "jp"
                                 ? `これは${color.name}色を使用した段落テキストです。ウェブサイトやアプリケーションでの読みやすさを確認するために、実際の文章のように表示しています。テキストの色とコントラスト比は、アクセシビリティにおいて非常に重要な要素です。WCAGガイドラインでは、テキストと背景のコントラスト比について明確な基準が設けられています。`
                                 : `This is paragraph text using the ${color.name} color. It is displayed like an actual text to check readability on websites and applications. Text color and contrast ratio are very important elements in accessibility. The WCAG guidelines set clear standards for the contrast ratio between text and background.`}
                             </p>
-                            <p className="text-base" style={{ color: color.value }}>
+                            <p className="text-base" style={{ color: displayColor }}>
                               {language === "jp"
                                 ? `標準サイズのテキスト（16px以下）では、AA準拠には4.5:1以上、AAA準拠には7:1以上のコントラスト比が必要です。大きなテキスト（18pt以上、または14pt以上の太字）では、AA準拠には3:1以上、AAA準拠には4.5:1以上が必要です。`
                                 : `For standard size text (16px or less), a contrast ratio of at least 4.5:1 is required for AA compliance, and 7:1 for AAA compliance. For large text (18pt or larger, or 14pt or larger bold), a contrast ratio of at least 3:1 is required for AA compliance, and 4.5:1 for AAA compliance.`}
@@ -248,7 +267,8 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                 <TabsContent value="all-sizes" className="mt-0">
                   <div className="space-y-8">
                     {colors.map((color) => {
-                      const contrastRatio = calculateContrastRatio(selectedBackground, color.value)
+                      const displayColor = getDisplayColor(color)
+                      const contrastRatio = calculateContrastRatio(selectedBackground, displayColor)
                       const wcagLevel = getWCAGLevel(contrastRatio)
                       const contrastBadgeClass = getContrastBadgeClass(contrastRatio)
 
@@ -259,7 +279,7 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                               className="text-sm font-medium"
                               style={{ color: selectedBackground === "#FFFFFF" ? "#000000" : "#FFFFFF" }}
                             >
-                              {color.name} ({color.value})
+                              {color.name} ({displayColor})
                             </span>
                             <div className="flex items-center gap-1">
                               <span
@@ -278,7 +298,7 @@ export function TextColorPreview({ colors }: TextColorPreviewProps) {
                           </div>
                           <div className="space-y-2">
                             {fontSizeOptions.map((size) => (
-                              <p key={size.value} className={size.value} style={{ color: color.value }}>
+                              <p key={size.value} className={size.value} style={{ color: displayColor }}>
                                 {size.name} -{" "}
                                 {language === "jp"
                                   ? `これは${color.name}色を使用したテキストです。`

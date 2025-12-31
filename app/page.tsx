@@ -9,7 +9,7 @@ import { SimpleColorPicker } from "@/components/simple-color-picker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { generateColorVariations } from "@/lib/color-utils"
+import { generateColorVariations, generateDarkModeColor, generateDarkModeVariations } from "@/lib/color-utils"
 import { ColorDisplay } from "@/components/color-display"
 import { ExportImportPanel } from "@/components/export-import-panel"
 import { FigmaTokensPanel } from "@/components/figma-tokens-panel"
@@ -61,6 +61,7 @@ function PaletteApp() {
     { name: "text", value: "#1e293b", role: "text" },
   ])
   const [colorVariations, setColorVariations] = useState<Record<string, Record<string, string>>>({})
+  const [darkColorVariations, setDarkColorVariations] = useState<Record<string, Record<string, string>>>({})
   const [textColorSettings, setTextColorSettings] = useState<TextColorSettingsType>({
     main: "default",
     dark: "default",
@@ -204,23 +205,42 @@ function PaletteApp() {
   // Generate color variations when colors change
   useEffect(() => {
     const variations: Record<string, Record<string, string>> = {}
+    const darkVariations: Record<string, Record<string, string>> = {}
 
     colorData.forEach((color) => {
-      // カスタムバリエーションがある場合はそれを使用し、なければ生成する
+      // Light mode variations
       if (color.variations) {
         variations[color.name] = color.variations
       } else {
-        // main/dark/light/lighterの展開を持つカラーのみ自動生成
         if (hasStandardVariations(color)) {
           variations[color.name] = generateColorVariations(color.value)
         } else {
-          // それ以外は単一カラーとして扱う
           variations[color.name] = { main: color.value }
+        }
+      }
+
+      // Dark mode variations
+      if (color.darkVariations) {
+        darkVariations[color.name] = color.darkVariations
+      } else if (color.darkValue) {
+        // darkValueがある場合はそこからバリエーションを生成
+        if (hasStandardVariations(color)) {
+          darkVariations[color.name] = generateColorVariations(color.darkValue)
+        } else {
+          darkVariations[color.name] = { main: color.darkValue }
+        }
+      } else {
+        // Auto-generate dark mode colors from light mode
+        if (hasStandardVariations(color)) {
+          darkVariations[color.name] = generateDarkModeVariations(variations[color.name])
+        } else {
+          darkVariations[color.name] = { main: generateDarkModeColor(color.value) }
         }
       }
     })
 
     setColorVariations(variations)
+    setDarkColorVariations(darkVariations)
   }, [colorData])
 
   // Save to localStorage function
@@ -229,6 +249,7 @@ function PaletteApp() {
       const dataToSave = {
         colors: colorData,
         variations: colorVariations,
+        darkVariations: darkColorVariations, // ダークモードバリエーションを追加
         textColorSettings: textColorSettings, // テキストカラー設定を追加
         primaryColorIndex: primaryColorIndex,
         colorMode: colorMode,
@@ -257,6 +278,13 @@ function PaletteApp() {
   const handleColorChange = (index: number, value: string) => {
     const newColorData = [...colorData]
     newColorData[index] = { ...newColorData[index], value }
+    setColorData(newColorData)
+  }
+
+  // ダークモード用の色変更ハンドラー
+  const handleDarkColorChange = (index: number, value: string) => {
+    const newColorData = [...colorData]
+    newColorData[index] = { ...newColorData[index], darkValue: value }
     setColorData(newColorData)
   }
 
@@ -470,6 +498,7 @@ function PaletteApp() {
   const exportData = {
     colors: colorData,
     variations: colorVariations,
+    darkVariations: darkColorVariations, // ダークモードバリエーションを追加
     textColorSettings: textColorSettings, // テキストカラー設定を追加
     primaryColorIndex: primaryColorIndex,
     colorMode: colorMode,
@@ -1016,8 +1045,10 @@ function PaletteApp() {
                                                 index={realIndex}
                                                 name={color.name}
                                                 color={color.value}
+                                                darkColor={color.darkValue}
                                                 isPrimary={realIndex === primaryColorIndex}
                                                 onColorChange={(value) => handleColorChange(realIndex, value)}
+                                                onDarkColorChange={(value) => handleDarkColorChange(realIndex, value)}
                                                 onNameChange={(name) => handleNameChange(realIndex, name)}
                                                 onSetAsPrimary={
                                                   realIndex !== primaryColorIndex
@@ -1032,8 +1063,10 @@ function PaletteApp() {
                                                 index={realIndex}
                                                 name={color.name}
                                                 color={color.value}
+                                                darkColor={color.darkValue}
                                                 isPrimary={realIndex === primaryColorIndex}
                                                 onColorChange={(value) => handleColorChange(realIndex, value)}
+                                                onDarkColorChange={(value) => handleDarkColorChange(realIndex, value)}
                                                 onNameChange={(name) => handleNameChange(realIndex, name)}
                                                 dragHandleProps={provided.dragHandleProps}
                                                 colorRole={color.role}
@@ -1096,8 +1129,10 @@ function PaletteApp() {
                                                     index={realIndex}
                                                     name={color.name}
                                                     color={color.value}
+                                                    darkColor={color.darkValue}
                                                     isPrimary={realIndex === primaryColorIndex}
                                                     onColorChange={(value) => handleColorChange(realIndex, value)}
+                                                    onDarkColorChange={(value) => handleDarkColorChange(realIndex, value)}
                                                     onNameChange={(name) => handleNameChange(realIndex, name)}
                                                     dragHandleProps={provided.dragHandleProps}
                                                     colorRole={color.role}
@@ -1108,8 +1143,10 @@ function PaletteApp() {
                                                     index={realIndex}
                                                     name={color.name}
                                                     color={color.value}
+                                                    darkColor={color.darkValue}
                                                     isPrimary={realIndex === primaryColorIndex}
                                                     onColorChange={(value) => handleColorChange(realIndex, value)}
+                                                    onDarkColorChange={(value) => handleDarkColorChange(realIndex, value)}
                                                     onNameChange={(name) => handleNameChange(realIndex, name)}
                                                     onSetAsPrimary={
                                                       realIndex !== primaryColorIndex
@@ -1157,8 +1194,10 @@ function PaletteApp() {
                                               index={realIndex}
                                               name={color.name}
                                               color={color.value}
+                                              darkColor={color.darkValue}
                                               isPrimary={realIndex === primaryColorIndex}
                                               onColorChange={(value) => handleColorChange(realIndex, value)}
+                                              onDarkColorChange={(value) => handleDarkColorChange(realIndex, value)}
                                               onNameChange={(name) => handleNameChange(realIndex, name)}
                                               onSetAsPrimary={
                                                 realIndex !== primaryColorIndex
@@ -1202,6 +1241,7 @@ function PaletteApp() {
                                 key={color.name}
                                 colorKey={color.name}
                                 variations={colorVariations[color.name] || {}}
+                                darkVariations={darkColorVariations[color.name] || {}}
                                 textColorSettings={textColorSettings}
                                 isPrimary={colorData.indexOf(color) === primaryColorIndex}
                                 colorMode={colorMode}
@@ -1209,6 +1249,7 @@ function PaletteApp() {
                                 showMaterialNames={showMaterialNames}
                                 colorRole={color.role}
                                 customVariations={color.variations}
+                                customDarkVariations={color.darkVariations}
                               />
                             ))}
                         </div>
@@ -1240,6 +1281,7 @@ function PaletteApp() {
                                         <ColorDisplay
                                           colorKey={color.name}
                                           variations={{ main: color.value }}
+                                          darkVariations={{ main: color.darkValue || darkColorVariations[color.name]?.main || generateDarkModeColor(color.value) }}
                                           textColorSettings={textColorSettings}
                                           isPrimary={colorData.indexOf(color) === primaryColorIndex}
                                           colorMode={colorMode}
@@ -1273,6 +1315,7 @@ function PaletteApp() {
                                   <ColorDisplay
                                     colorKey={color.name}
                                     variations={{ main: color.value }}
+                                    darkVariations={{ main: color.darkValue || darkColorVariations[color.name]?.main || generateDarkModeColor(color.value) }}
                                     textColorSettings={textColorSettings}
                                     isPrimary={colorData.indexOf(color) === primaryColorIndex}
                                     colorMode={colorMode}
@@ -1308,12 +1351,15 @@ function PaletteApp() {
                               key={key}
                               colorKey={key}
                               variations={variations}
+                              darkVariations={darkColorVariations[key] || {}}
                               textColorSettings={textColorSettings}
                               isPrimary={colorIndex === primaryColorIndex}
                               colorMode={colorMode}
                               showTailwindClasses={showTailwindClasses}
                               showMaterialNames={showMaterialNames}
                               colorRole={color.role}
+                              customVariations={color.variations}
+                              customDarkVariations={color.darkVariations}
                               disableVariationGeneration={disableVariationGeneration}
                             />
                           )
@@ -1364,8 +1410,10 @@ function PaletteApp() {
                                           index={realIndex}
                                           name={color.name}
                                           color={color.value}
+                                          darkColor={color.darkValue}
                                           isPrimary={realIndex === primaryColorIndex}
                                           onColorChange={(value) => handleColorChange(realIndex, value)}
+                                          onDarkColorChange={(value) => handleDarkColorChange(realIndex, value)}
                                           onNameChange={(name) => handleNameChange(realIndex, name)}
                                           onSetAsPrimary={
                                             realIndex !== primaryColorIndex
@@ -1421,8 +1469,10 @@ function PaletteApp() {
                                               index={realIndex}
                                               name={color.name}
                                               color={color.value}
+                                              darkColor={color.darkValue}
                                               isPrimary={realIndex === primaryColorIndex}
                                               onColorChange={(value) => handleColorChange(realIndex, value)}
+                                              onDarkColorChange={(value) => handleDarkColorChange(realIndex, value)}
                                               onNameChange={(name) => handleNameChange(realIndex, name)}
                                               onSetAsPrimary={
                                                 realIndex !== primaryColorIndex
@@ -1465,8 +1515,10 @@ function PaletteApp() {
                                           index={realIndex}
                                           name={color.name}
                                           color={color.value}
+                                          darkColor={color.darkValue}
                                           isPrimary={realIndex === primaryColorIndex}
                                           onColorChange={(value) => handleColorChange(realIndex, value)}
+                                          onDarkColorChange={(value) => handleDarkColorChange(realIndex, value)}
                                           onNameChange={(name) => handleNameChange(realIndex, name)}
                                           onSetAsPrimary={
                                             realIndex !== primaryColorIndex
@@ -1510,6 +1562,7 @@ function PaletteApp() {
                             key={color.name}
                             colorKey={color.name}
                             variations={colorVariations[color.name] || {}}
+                            darkVariations={darkColorVariations[color.name] || {}}
                             textColorSettings={textColorSettings}
                             isPrimary={colorData.indexOf(color) === primaryColorIndex}
                             colorMode={colorMode}
@@ -1517,6 +1570,7 @@ function PaletteApp() {
                             showMaterialNames={showMaterialNames}
                             colorRole={color.role}
                             customVariations={color.variations}
+                            customDarkVariations={color.darkVariations}
                           />
                         ))}
                     </div>
@@ -1548,6 +1602,7 @@ function PaletteApp() {
                                     <ColorDisplay
                                       colorKey={color.name}
                                       variations={{ main: color.value }}
+                                      darkVariations={{ main: color.darkValue || darkColorVariations[color.name]?.main || generateDarkModeColor(color.value) }}
                                       textColorSettings={textColorSettings}
                                       isPrimary={colorData.indexOf(color) === primaryColorIndex}
                                       colorMode={colorMode}
@@ -1581,6 +1636,7 @@ function PaletteApp() {
                               <ColorDisplay
                                 colorKey={color.name}
                                 variations={{ main: color.value }}
+                                darkVariations={{ main: color.darkValue || darkColorVariations[color.name]?.main || generateDarkModeColor(color.value) }}
                                 textColorSettings={textColorSettings}
                                 isPrimary={colorData.indexOf(color) === primaryColorIndex}
                                 colorMode={colorMode}
@@ -1616,12 +1672,15 @@ function PaletteApp() {
                           key={key}
                           colorKey={key}
                           variations={variations}
+                          darkVariations={darkColorVariations[key] || {}}
                           textColorSettings={textColorSettings}
                           isPrimary={colorIndex === primaryColorIndex}
                           colorMode={colorMode}
                           showTailwindClasses={showTailwindClasses}
                           showMaterialNames={showMaterialNames}
                           colorRole={color.role}
+                          customVariations={color.variations}
+                          customDarkVariations={color.darkVariations}
                           disableVariationGeneration={disableVariationGeneration}
                         />
                       )

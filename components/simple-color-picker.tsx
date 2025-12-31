@@ -10,13 +10,16 @@ import { GripVertical } from "lucide-react"
 import type { ColorRole } from "@/types/palette"
 import { colorRoleDescriptions } from "@/types/palette"
 import { getRoleBadgeClass, getRoleDisplayName, getGroupBadgeClass } from "@/lib/color-role-styles"
+import { useTheme } from "@/contexts/theme-context"
 
 interface SimpleColorPickerProps {
   index: number
   name: string
   color: string
+  darkColor?: string // ダークモード用の色
   isPrimary?: boolean
   onColorChange: (color: string) => void
+  onDarkColorChange?: (color: string) => void // ダークモード用の色変更
   onNameChange: (name: string) => void
   dragHandleProps?: any
   colorRole?: ColorRole
@@ -27,26 +30,35 @@ export function SimpleColorPicker({
   index,
   name,
   color = "#ffffff", // デフォルト値を設定
+  darkColor,
   isPrimary = false,
   onColorChange,
+  onDarkColorChange,
   onNameChange,
   dragHandleProps,
   colorRole,
   group,
 }: SimpleColorPickerProps) {
+  const { theme } = useTheme()
+
+  // 現在のテーマに応じた表示色を決定
+  const isDarkMode = theme === "dark"
+  const displayColor = isDarkMode ? (darkColor || color) : color
+  const handleCurrentColorChange = isDarkMode ? (onDarkColorChange || onColorChange) : onColorChange
+
   // ローカルの状態を追加して、propsの変更を追跡
-  const [localColor, setLocalColor] = useState(color || "#ffffff")
+  const [localColor, setLocalColor] = useState(displayColor || "#ffffff")
   const [localName, setLocalName] = useState(name || `color${index + 1}`)
 
   // propsが変更されたらローカルの状態を更新
   useEffect(() => {
-    if (color) {
-      setLocalColor(color)
+    if (displayColor) {
+      setLocalColor(displayColor)
     }
     if (name) {
       setLocalName(name)
     }
-  }, [color, name, index])
+  }, [displayColor, name, index])
 
   // 名前変更ハンドラ
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,11 +67,11 @@ export function SimpleColorPicker({
     onNameChange(newName)
   }
 
-  // 色変更ハンドラ
+  // 色変更ハンドラ（テーマに応じて適切なハンドラーを呼び出す）
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newColor = e.target.value
     setLocalColor(newColor)
-    onColorChange(newColor)
+    handleCurrentColorChange(newColor)
   }
 
   // グループの表示名を取得
@@ -122,6 +134,10 @@ export function SimpleColorPicker({
             onChange={handleColorChange}
             className="w-8 h-8 p-0 border-0"
           />
+        </div>
+        {/* テーマ表示インジケーター */}
+        <div className="flex items-center justify-center text-[10px] text-gray-400 dark:text-gray-500">
+          {isDarkMode ? "🌙 Dark" : "☀️ Light"}
         </div>
       </CardContent>
     </Card>
