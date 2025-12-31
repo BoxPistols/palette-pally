@@ -100,7 +100,7 @@ const BaseModalContent = React.forwardRef<
   className,
   children,
   showFullscreenToggle = true,
-  fullscreenClassName = "fixed inset-4 max-w-none translate-x-0 translate-y-0 left-0 top-0",
+  fullscreenClassName = "fixed inset-4 max-w-none translate-x-0 translate-y-0 left-0 top-0 h-[calc(100vh-2rem)]",
   normalClassName = "max-w-lg",
   ...props
 }, ref) => {
@@ -112,13 +112,14 @@ const BaseModalContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed z-50 grid gap-4 border bg-background p-6 shadow-lg duration-200",
+          "fixed z-50 border bg-background p-6 shadow-lg duration-200",
           "data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
           "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
           isFullscreen
-            ? fullscreenClassName
+            ? cn("flex flex-col", fullscreenClassName)
             : cn(
+                "grid gap-4",
                 "left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]",
                 "w-full sm:rounded-lg",
                 "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
@@ -222,7 +223,7 @@ const BaseModalBody = React.forwardRef<
       ref={ref}
       className={cn(
         "overflow-auto",
-        isFullscreen ? "flex-1" : "",
+        isFullscreen ? "flex-1 min-h-0" : "",
         className
       )}
       style={!isFullscreen ? { maxHeight } : undefined}
@@ -231,6 +232,9 @@ const BaseModalBody = React.forwardRef<
   )
 })
 BaseModalBody.displayName = "BaseModalBody"
+
+// Helper hook to check fullscreen state for child components
+export { useModal as useModalFullscreen }
 
 export {
   BaseModalOverlay,

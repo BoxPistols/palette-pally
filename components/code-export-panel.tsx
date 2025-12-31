@@ -11,6 +11,7 @@ import {
   BaseModalDescription,
   BaseModalBody,
   BaseModalFooter,
+  useModal,
 } from "@/components/ui/base-modal"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/components/ui/use-toast"
@@ -26,6 +27,22 @@ import {
   generateChakraTheme,
   generateCSSModule,
 } from "@/lib/code-generators"
+
+// コードプレビューコンポーネント（フルスクリーン対応）
+function CodePreview({ code, onCopy, copyLabel }: { code: string; onCopy: () => void; copyLabel: string }) {
+  const { isFullscreen } = useModal()
+
+  return (
+    <div className={`relative ${isFullscreen ? "h-full" : ""}`}>
+      <pre className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto text-sm ${isFullscreen ? "h-full" : "max-h-[400px]"}`}>
+        <code>{code}</code>
+      </pre>
+      <Button size="sm" className="absolute top-2 right-2" onClick={onCopy}>
+        {copyLabel}
+      </Button>
+    </div>
+  )
+}
 
 interface CodeExportPanelProps {
   colors: ColorData[]
@@ -127,8 +144,8 @@ export function CodeExportPanel({ colors, variations, primaryColorIndex }: CodeE
             <BaseModalDescription>{t.description}</BaseModalDescription>
           </BaseModalHeader>
 
-          <BaseModalBody maxHeight="60vh" className="flex-1 py-4">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
+          <BaseModalBody maxHeight="60vh" className="flex-1 py-4 min-h-0">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col min-h-0">
               <TabsList className="flex w-full h-auto flex-wrap gap-1 mb-4">
                 <TabsTrigger value="css" className="whitespace-nowrap">{t.css}</TabsTrigger>
                 <TabsTrigger value="scss" className="whitespace-nowrap">{t.scss}</TabsTrigger>
@@ -139,82 +156,33 @@ export function CodeExportPanel({ colors, variations, primaryColorIndex }: CodeE
                 <TabsTrigger value="cssModule" className="whitespace-nowrap">{t.cssModule}</TabsTrigger>
               </TabsList>
 
-              <div className="flex-1 overflow-auto">
+              <div className="flex-1 overflow-auto min-h-0">
                 <TabsContent value="css" className="mt-0 p-0 h-full">
-                  <div className="relative">
-                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                      <code>{cssCode}</code>
-                    </pre>
-                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(cssCode)}>
-                      {t.copy}
-                    </Button>
-                  </div>
+                  <CodePreview code={cssCode} onCopy={() => copyToClipboard(cssCode)} copyLabel={t.copy} />
                 </TabsContent>
 
                 <TabsContent value="scss" className="mt-0 p-0 h-full">
-                  <div className="relative">
-                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                      <code>{scssCode}</code>
-                    </pre>
-                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(scssCode)}>
-                      {t.copy}
-                    </Button>
-                  </div>
+                  <CodePreview code={scssCode} onCopy={() => copyToClipboard(scssCode)} copyLabel={t.copy} />
                 </TabsContent>
 
                 <TabsContent value="tailwind" className="mt-0 p-0 h-full">
-                  <div className="relative">
-                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                      <code>{tailwindCode}</code>
-                    </pre>
-                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(tailwindCode)}>
-                      {t.copy}
-                    </Button>
-                  </div>
+                  <CodePreview code={tailwindCode} onCopy={() => copyToClipboard(tailwindCode)} copyLabel={t.copy} />
                 </TabsContent>
 
                 <TabsContent value="material" className="mt-0 p-0 h-full">
-                  <div className="relative">
-                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                      <code>{materialCode}</code>
-                    </pre>
-                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(materialCode)}>
-                      {t.copy}
-                    </Button>
-                  </div>
+                  <CodePreview code={materialCode} onCopy={() => copyToClipboard(materialCode)} copyLabel={t.copy} />
                 </TabsContent>
 
                 <TabsContent value="styled" className="mt-0 p-0 h-full">
-                  <div className="relative">
-                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                      <code>{styledCode}</code>
-                    </pre>
-                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(styledCode)}>
-                      {t.copy}
-                    </Button>
-                  </div>
+                  <CodePreview code={styledCode} onCopy={() => copyToClipboard(styledCode)} copyLabel={t.copy} />
                 </TabsContent>
 
                 <TabsContent value="chakra" className="mt-0 p-0 h-full">
-                  <div className="relative">
-                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                      <code>{chakraCode}</code>
-                    </pre>
-                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(chakraCode)}>
-                      {t.copy}
-                    </Button>
-                  </div>
+                  <CodePreview code={chakraCode} onCopy={() => copyToClipboard(chakraCode)} copyLabel={t.copy} />
                 </TabsContent>
 
                 <TabsContent value="cssModule" className="mt-0 p-0 h-full">
-                  <div className="relative">
-                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                      <code>{cssModuleCode}</code>
-                    </pre>
-                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(cssModuleCode)}>
-                      {t.copy}
-                    </Button>
-                  </div>
+                  <CodePreview code={cssModuleCode} onCopy={() => copyToClipboard(cssModuleCode)} copyLabel={t.copy} />
                 </TabsContent>
               </div>
             </Tabs>
