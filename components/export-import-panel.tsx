@@ -6,14 +6,14 @@ import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  BaseModal,
+  BaseModalContent,
+  BaseModalHeader,
+  BaseModalTitle,
+  BaseModalDescription,
+  BaseModalBody,
+  BaseModalFooter,
+} from "@/components/ui/base-modal"
 import { toast } from "@/components/ui/use-toast"
 import { useLanguage } from "@/contexts/language-context"
 import type { PaletteType } from "@/types/palette"
@@ -257,27 +257,32 @@ export function ExportImportPanel({ data, onImport }: ExportImportPanelProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 justify-center">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={prepareExport} variant="default" size="sm">
-              {t.exportButton}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{t.exportTitle}</DialogTitle>
-              <DialogDescription>{t.exportDescription}</DialogDescription>
-            </DialogHeader>
-            <div className="max-h-[300px] overflow-auto bg-gray-50 p-2 rounded text-xs font-mono">
-              <pre>{jsonPreview}</pre>
-            </div>
-            <DialogFooter>
+        <Button onClick={prepareExport} variant="default" size="sm">
+          {t.exportButton}
+        </Button>
+
+        <BaseModal open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <BaseModalContent
+            normalClassName="sm:max-w-md"
+            fullscreenClassName="fixed inset-4 max-w-none translate-x-0 translate-y-0 left-0 top-0 flex flex-col"
+            className="flex flex-col"
+          >
+            <BaseModalHeader>
+              <BaseModalTitle>{t.exportTitle}</BaseModalTitle>
+              <BaseModalDescription>{t.exportDescription}</BaseModalDescription>
+            </BaseModalHeader>
+            <BaseModalBody maxHeight="300px" className="py-4">
+              <div className="overflow-auto bg-gray-50 dark:bg-gray-800 p-2 rounded text-xs font-mono h-full">
+                <pre>{jsonPreview}</pre>
+              </div>
+            </BaseModalBody>
+            <BaseModalFooter>
               <Button onClick={exportJSON} type="submit">
                 {t.downloadButton}
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </BaseModalFooter>
+          </BaseModalContent>
+        </BaseModal>
 
         <div className="relative">
           <Button variant="outline" size="sm" className="relative">

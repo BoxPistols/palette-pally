@@ -2,15 +2,16 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Eye, Maximize2, Minimize2 } from "lucide-react"
+import { Eye } from "lucide-react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+  BaseModal,
+  BaseModalContent,
+  BaseModalHeader,
+  BaseModalTitle,
+  BaseModalDescription,
+  BaseModalBody,
+  BaseModalFooter,
+} from "@/components/ui/base-modal"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { simulateAllColorBlindness, type ColorBlindnessType } from "@/lib/color-blind-simulation"
 import { useLanguage } from "@/contexts/language-context"
@@ -27,7 +28,6 @@ export function ColorBlindSimulator({ colors, variations }: ColorBlindSimulatorP
   const { language, t } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const [showOriginal, setShowOriginal] = useState(true)
-  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // 色覚異常の種類と説明
   const colorBlindnessTypes: Record<
@@ -104,10 +104,6 @@ export function ColorBlindSimulator({ colors, variations }: ColorBlindSimulatorP
     )
   }
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen)
-  }
-
   return (
     <>
       <Button
@@ -121,35 +117,33 @@ export function ColorBlindSimulator({ colors, variations }: ColorBlindSimulatorP
         <span>{t("button.colorBlind")}</span>
       </Button>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent
-          className={`${isFullscreen ? "max-w-[95vw] w-[95vw] max-h-[90vh] h-[90vh]" : "max-w-[960px] w-[90vw] max-h-[85vh]"} overflow-hidden flex flex-col`}
+      <BaseModal open={isOpen} onOpenChange={setIsOpen}>
+        <BaseModalContent
+          normalClassName="max-w-[960px] w-[90vw]"
+          fullscreenClassName="fixed inset-4 max-w-none translate-x-0 translate-y-0 left-0 top-0 flex flex-col"
+          className="flex flex-col"
         >
-          <DialogHeader className="sticky top-0 z-10 pb-4 border-b flex flex-row items-center justify-between">
-            <div>
-              <DialogTitle>{t("colorBlind.title")}</DialogTitle>
-              <DialogDescription>{t("colorBlind.description")}</DialogDescription>
+          <BaseModalHeader className="pb-4 border-b">
+            <BaseModalTitle>{t("colorBlind.title")}</BaseModalTitle>
+            <BaseModalDescription>{t("colorBlind.description")}</BaseModalDescription>
+          </BaseModalHeader>
+
+          <BaseModalBody maxHeight="60vh" className="flex-1 py-4">
+            <div className="flex items-center justify-end mb-3 gap-2">
+              <Switch id="show-original" checked={showOriginal} onCheckedChange={setShowOriginal} />
+              <Label htmlFor="show-original">{language === "jp" ? "元の色を表示" : "Show original colors"}</Label>
             </div>
-            <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="h-8 w-8">
-              {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            </Button>
-          </DialogHeader>
 
-          <div className="flex items-center justify-end my-3 gap-2 px-4">
-            <Switch id="show-original" checked={showOriginal} onCheckedChange={setShowOriginal} />
-            <Label htmlFor="show-original">{language === "jp" ? "元の色を表示" : "Show original colors"}</Label>
-          </div>
+            <Tabs defaultValue="overview" className="w-full h-full flex flex-col">
+              <TabsList className="flex w-full h-auto flex-wrap gap-1 mb-4">
+                <TabsTrigger value="overview" className="whitespace-nowrap">{t("colorBlind.overview")}</TabsTrigger>
+                <TabsTrigger value="protanopia" className="whitespace-nowrap">{colorBlindnessTypes.protanopia.name[language]}</TabsTrigger>
+                <TabsTrigger value="deuteranopia" className="whitespace-nowrap">{colorBlindnessTypes.deuteranopia.name[language]}</TabsTrigger>
+                <TabsTrigger value="tritanopia" className="whitespace-nowrap">{colorBlindnessTypes.tritanopia.name[language]}</TabsTrigger>
+                <TabsTrigger value="achromatopsia" className="whitespace-nowrap">{colorBlindnessTypes.achromatopsia.name[language]}</TabsTrigger>
+              </TabsList>
 
-          <Tabs defaultValue="overview" className="w-full flex-1 overflow-hidden flex flex-col">
-            <TabsList className="grid grid-cols-2 sm:grid-cols-5 mb-4 px-4">
-              <TabsTrigger value="overview">{t("colorBlind.overview")}</TabsTrigger>
-              <TabsTrigger value="protanopia">{colorBlindnessTypes.protanopia.name[language]}</TabsTrigger>
-              <TabsTrigger value="deuteranopia">{colorBlindnessTypes.deuteranopia.name[language]}</TabsTrigger>
-              <TabsTrigger value="tritanopia">{colorBlindnessTypes.tritanopia.name[language]}</TabsTrigger>
-              <TabsTrigger value="achromatopsia">{colorBlindnessTypes.achromatopsia.name[language]}</TabsTrigger>
-            </TabsList>
-
-            <div className="flex-1 overflow-auto px-4">
+              <div className="flex-1 overflow-auto">
               <TabsContent value="overview" className="mt-0 p-0">
                 <div className="space-y-6">
                   <p className="text-sm">
@@ -232,14 +226,15 @@ export function ColorBlindSimulator({ colors, variations }: ColorBlindSimulatorP
                   </div>
                 </TabsContent>
               ))}
-            </div>
-          </Tabs>
+              </div>
+            </Tabs>
+          </BaseModalBody>
 
-          <DialogFooter className="sticky bottom-0 z-10 pt-4 border-t mt-4">
+          <BaseModalFooter className="pt-4 border-t">
             <Button onClick={() => setIsOpen(false)}>{t("colorBlind.close")}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </BaseModalFooter>
+        </BaseModalContent>
+      </BaseModal>
     </>
   )
 }

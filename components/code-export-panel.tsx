@@ -4,13 +4,14 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Code } from "lucide-react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+  BaseModal,
+  BaseModalContent,
+  BaseModalHeader,
+  BaseModalTitle,
+  BaseModalDescription,
+  BaseModalBody,
+  BaseModalFooter,
+} from "@/components/ui/base-modal"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/components/ui/use-toast"
 import { useLanguage } from "@/contexts/language-context"
@@ -115,109 +116,115 @@ export function CodeExportPanel({ colors, variations, primaryColorIndex }: CodeE
         <span>{t.button}</span>
       </Button>
 
-      <Dialog open={isOpen} onOpenChange={close}>
-        <DialogContent className="max-w-[800px] w-[90vw] max-h-[85vh] overflow-hidden flex flex-col">
-          <DialogHeader className="sticky top-0 z-10 pb-4 border-b">
-            <DialogTitle>{t.title}</DialogTitle>
-            <DialogDescription>{t.description}</DialogDescription>
-          </DialogHeader>
+      <BaseModal open={isOpen} onOpenChange={close}>
+        <BaseModalContent
+          normalClassName="max-w-[800px] w-[90vw]"
+          fullscreenClassName="fixed inset-4 max-w-none translate-x-0 translate-y-0 left-0 top-0 flex flex-col"
+          className="flex flex-col"
+        >
+          <BaseModalHeader className="pb-4 border-b">
+            <BaseModalTitle>{t.title}</BaseModalTitle>
+            <BaseModalDescription>{t.description}</BaseModalDescription>
+          </BaseModalHeader>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 overflow-hidden flex flex-col">
-            <TabsList className="grid grid-cols-3 sm:grid-cols-7 mb-4 px-4">
-              <TabsTrigger value="css">{t.css}</TabsTrigger>
-              <TabsTrigger value="scss">{t.scss}</TabsTrigger>
-              <TabsTrigger value="tailwind">{t.tailwind}</TabsTrigger>
-              <TabsTrigger value="material">{t.material}</TabsTrigger>
-              <TabsTrigger value="styled">{t.styled}</TabsTrigger>
-              <TabsTrigger value="chakra">{t.chakra}</TabsTrigger>
-              <TabsTrigger value="cssModule">{t.cssModule}</TabsTrigger>
-            </TabsList>
+          <BaseModalBody maxHeight="60vh" className="flex-1 py-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
+              <TabsList className="flex w-full h-auto flex-wrap gap-1 mb-4">
+                <TabsTrigger value="css" className="whitespace-nowrap">{t.css}</TabsTrigger>
+                <TabsTrigger value="scss" className="whitespace-nowrap">{t.scss}</TabsTrigger>
+                <TabsTrigger value="tailwind" className="whitespace-nowrap">{t.tailwind}</TabsTrigger>
+                <TabsTrigger value="material" className="whitespace-nowrap">{t.material}</TabsTrigger>
+                <TabsTrigger value="styled" className="whitespace-nowrap">{t.styled}</TabsTrigger>
+                <TabsTrigger value="chakra" className="whitespace-nowrap">{t.chakra}</TabsTrigger>
+                <TabsTrigger value="cssModule" className="whitespace-nowrap">{t.cssModule}</TabsTrigger>
+              </TabsList>
 
-            <div className="flex-1 overflow-auto px-4">
-              <TabsContent value="css" className="mt-0 p-0 h-full">
-                <div className="relative">
-                  <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                    <code>{cssCode}</code>
-                  </pre>
-                  <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(cssCode)}>
-                    {t.copy}
-                  </Button>
-                </div>
-              </TabsContent>
+              <div className="flex-1 overflow-auto">
+                <TabsContent value="css" className="mt-0 p-0 h-full">
+                  <div className="relative">
+                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
+                      <code>{cssCode}</code>
+                    </pre>
+                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(cssCode)}>
+                      {t.copy}
+                    </Button>
+                  </div>
+                </TabsContent>
 
-              <TabsContent value="scss" className="mt-0 p-0 h-full">
-                <div className="relative">
-                  <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                    <code>{scssCode}</code>
-                  </pre>
-                  <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(scssCode)}>
-                    {t.copy}
-                  </Button>
-                </div>
-              </TabsContent>
+                <TabsContent value="scss" className="mt-0 p-0 h-full">
+                  <div className="relative">
+                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
+                      <code>{scssCode}</code>
+                    </pre>
+                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(scssCode)}>
+                      {t.copy}
+                    </Button>
+                  </div>
+                </TabsContent>
 
-              <TabsContent value="tailwind" className="mt-0 p-0 h-full">
-                <div className="relative">
-                  <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                    <code>{tailwindCode}</code>
-                  </pre>
-                  <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(tailwindCode)}>
-                    {t.copy}
-                  </Button>
-                </div>
-              </TabsContent>
+                <TabsContent value="tailwind" className="mt-0 p-0 h-full">
+                  <div className="relative">
+                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
+                      <code>{tailwindCode}</code>
+                    </pre>
+                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(tailwindCode)}>
+                      {t.copy}
+                    </Button>
+                  </div>
+                </TabsContent>
 
-              <TabsContent value="material" className="mt-0 p-0 h-full">
-                <div className="relative">
-                  <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                    <code>{materialCode}</code>
-                  </pre>
-                  <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(materialCode)}>
-                    {t.copy}
-                  </Button>
-                </div>
-              </TabsContent>
+                <TabsContent value="material" className="mt-0 p-0 h-full">
+                  <div className="relative">
+                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
+                      <code>{materialCode}</code>
+                    </pre>
+                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(materialCode)}>
+                      {t.copy}
+                    </Button>
+                  </div>
+                </TabsContent>
 
-              <TabsContent value="styled" className="mt-0 p-0 h-full">
-                <div className="relative">
-                  <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                    <code>{styledCode}</code>
-                  </pre>
-                  <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(styledCode)}>
-                    {t.copy}
-                  </Button>
-                </div>
-              </TabsContent>
+                <TabsContent value="styled" className="mt-0 p-0 h-full">
+                  <div className="relative">
+                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
+                      <code>{styledCode}</code>
+                    </pre>
+                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(styledCode)}>
+                      {t.copy}
+                    </Button>
+                  </div>
+                </TabsContent>
 
-              <TabsContent value="chakra" className="mt-0 p-0 h-full">
-                <div className="relative">
-                  <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                    <code>{chakraCode}</code>
-                  </pre>
-                  <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(chakraCode)}>
-                    {t.copy}
-                  </Button>
-                </div>
-              </TabsContent>
+                <TabsContent value="chakra" className="mt-0 p-0 h-full">
+                  <div className="relative">
+                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
+                      <code>{chakraCode}</code>
+                    </pre>
+                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(chakraCode)}>
+                      {t.copy}
+                    </Button>
+                  </div>
+                </TabsContent>
 
-              <TabsContent value="cssModule" className="mt-0 p-0 h-full">
-                <div className="relative">
-                  <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
-                    <code>{cssModuleCode}</code>
-                  </pre>
-                  <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(cssModuleCode)}>
-                    {t.copy}
-                  </Button>
-                </div>
-              </TabsContent>
-            </div>
-          </Tabs>
+                <TabsContent value="cssModule" className="mt-0 p-0 h-full">
+                  <div className="relative">
+                    <pre className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-auto max-h-[400px] text-sm">
+                      <code>{cssModuleCode}</code>
+                    </pre>
+                    <Button size="sm" className="absolute top-2 right-2" onClick={() => copyToClipboard(cssModuleCode)}>
+                      {t.copy}
+                    </Button>
+                  </div>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </BaseModalBody>
 
-          <DialogFooter className="sticky bottom-0 z-10 pt-4 border-t mt-4">
+          <BaseModalFooter className="pt-4 border-t">
             <Button onClick={close}>{t.close}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </BaseModalFooter>
+        </BaseModalContent>
+      </BaseModal>
     </>
   )
 }

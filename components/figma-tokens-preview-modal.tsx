@@ -1,11 +1,16 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import {
+  BaseModal,
+  BaseModalContent,
+  BaseModalHeader,
+  BaseModalTitle,
+  BaseModalBody,
+  BaseModalFooter,
+} from "@/components/ui/base-modal"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLanguage } from "@/contexts/language-context"
-import { Maximize2, Minimize2 } from "lucide-react"
 
 interface FigmaTokensPreviewModalProps {
   isOpen: boolean
@@ -21,11 +26,6 @@ export function FigmaTokensPreviewModal({
   title = "Figma Tokens Preview",
 }: FigmaTokensPreviewModalProps) {
   const { language } = useLanguage()
-  const [isFullscreen, setIsFullscreen] = useState(false)
-
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen)
-  }
 
   // JSONをきれいに表示するための関数
   const formatJSON = (json: any) => {
@@ -38,26 +38,24 @@ export function FigmaTokensPreviewModal({
   const hasTypography = tokens && tokens.typography && Object.keys(tokens.typography).length > 0
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent
-        className={`${
-          isFullscreen ? "max-w-[95vw] w-[95vw] max-h-[90vh]" : "max-w-[600px] w-[90vw] max-h-[80vh]"
-        } overflow-hidden flex flex-col`}
+    <BaseModal open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <BaseModalContent
+        normalClassName="max-w-[600px] w-[90vw]"
+        fullscreenClassName="fixed inset-4 max-w-none translate-x-0 translate-y-0 left-0 top-0 flex flex-col"
+        className="flex flex-col"
       >
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle>{title}</DialogTitle>
-          <Button variant="ghost" size="icon" onClick={toggleFullscreen}>
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-          </Button>
-        </DialogHeader>
+        <BaseModalHeader>
+          <BaseModalTitle>{title}</BaseModalTitle>
+        </BaseModalHeader>
 
-        <Tabs defaultValue="preview" className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="preview">{language === "jp" ? "プレビュー" : "Preview"}</TabsTrigger>
-            <TabsTrigger value="json">JSON</TabsTrigger>
-          </TabsList>
+        <BaseModalBody maxHeight="60vh" className="flex-1 py-4">
+          <Tabs defaultValue="preview" className="h-full flex flex-col">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="preview">{language === "jp" ? "プレビュー" : "Preview"}</TabsTrigger>
+              <TabsTrigger value="json">JSON</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="preview" className="flex-1 overflow-auto mt-4">
+            <TabsContent value="preview" className="flex-1 overflow-auto mt-0">
             {!hasTokens ? (
               <div className="text-center py-8 text-gray-500">
                 {language === "jp" ? "トークンデータがありません" : "No token data available"}
@@ -197,17 +195,18 @@ export function FigmaTokensPreviewModal({
             )}
           </TabsContent>
 
-          <TabsContent value="json" className="flex-1 overflow-auto mt-4">
+          <TabsContent value="json" className="flex-1 overflow-auto mt-0">
             <pre className="text-xs p-4 bg-gray-50 dark:bg-gray-800 rounded-md overflow-x-auto">
               {formatJSON(tokens)}
             </pre>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </BaseModalBody>
 
-        <DialogFooter className="mt-4">
+        <BaseModalFooter>
           <Button onClick={onClose}>{language === "jp" ? "閉じる" : "Close"}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </BaseModalFooter>
+      </BaseModalContent>
+    </BaseModal>
   )
 }

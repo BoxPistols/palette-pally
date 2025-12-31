@@ -1,13 +1,14 @@
 "use client"
 
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+  BaseModal,
+  BaseModalContent,
+  BaseModalHeader,
+  BaseModalTitle,
+  BaseModalDescription,
+  BaseModalBody,
+  BaseModalFooter,
+} from "@/components/ui/base-modal"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -295,7 +296,7 @@ export function HelpModal() {
   const t = language === "jp" ? texts.jp : texts.en
 
   return (
-    <Dialog open={isOpen} onOpenChange={close}>
+    <>
       {/* 5. ボタンのテキストを言語に応じて変更 */}
       <Button
         variant="outline"
@@ -307,200 +308,209 @@ export function HelpModal() {
         <HelpCircle className="h-4 w-4 text-blue-500" />
         <span className="text-blue-600">{language === "jp" ? "ヘルプ" : "Help"}</span>
       </Button>
-      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t.title}</DialogTitle>
-          <DialogDescription>{t.description}</DialogDescription>
-        </DialogHeader>
 
-        <Tabs defaultValue="basic">
-          {/* 6. タブのテキストを言語に応じて変更 */}
-          <TabsList className="grid grid-cols-5 mb-4">
-            <TabsTrigger value="basic">{t.tabs.basic}</TabsTrigger>
-            <TabsTrigger value="accessibility">{t.tabs.accessibility}</TabsTrigger>
-            <TabsTrigger value="advanced">{t.tabs.advanced}</TabsTrigger>
-            <TabsTrigger value="color-theory">{t.tabs.colorTheory}</TabsTrigger>
-            <TabsTrigger value="faq">{t.tabs.faq}</TabsTrigger>
-          </TabsList>
+      <BaseModal open={isOpen} onOpenChange={close}>
+        <BaseModalContent
+          normalClassName="sm:max-w-[700px]"
+          fullscreenClassName="fixed inset-4 max-w-none translate-x-0 translate-y-0 left-0 top-0 flex flex-col"
+          className="flex flex-col"
+        >
+          <BaseModalHeader>
+            <BaseModalTitle>{t.title}</BaseModalTitle>
+            <BaseModalDescription>{t.description}</BaseModalDescription>
+          </BaseModalHeader>
 
-          <TabsContent value="basic" className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <Palette className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.basic.colorPicker.title}</h3>
-                  <p className="text-sm text-gray-500">{t.basic.colorPicker.description}</p>
+          <BaseModalBody maxHeight="60vh" className="py-4">
+            <Tabs defaultValue="basic">
+              {/* 6. タブのテキストを言語に応じて変更 */}
+              <TabsList className="flex w-full h-auto flex-wrap gap-1 mb-4">
+                <TabsTrigger value="basic" className="whitespace-nowrap">{t.tabs.basic}</TabsTrigger>
+                <TabsTrigger value="accessibility" className="whitespace-nowrap">{t.tabs.accessibility}</TabsTrigger>
+                <TabsTrigger value="advanced" className="whitespace-nowrap">{t.tabs.advanced}</TabsTrigger>
+                <TabsTrigger value="color-theory" className="whitespace-nowrap">{t.tabs.colorTheory}</TabsTrigger>
+                <TabsTrigger value="faq" className="whitespace-nowrap">{t.tabs.faq}</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="basic" className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <Palette className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.basic.colorPicker.title}</h3>
+                      <p className="text-sm text-gray-500">{t.basic.colorPicker.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Tag className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.basic.colorRoles.title}</h3>
+                      <p className="text-sm text-gray-500">{t.basic.colorRoles.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Sliders className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.basic.colorCount.title}</h3>
+                      <p className="text-sm text-gray-500">{t.basic.colorCount.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Save className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.basic.saveReset.title}</h3>
+                      <p className="text-sm text-gray-500">{t.basic.saveReset.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Palette className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.basic.colorPalette.title}</h3>
+                      <p className="text-sm text-gray-500">{t.basic.colorPalette.description}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </TabsContent>
 
-              <div className="flex items-start gap-2">
-                <Tag className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.basic.colorRoles.title}</h3>
-                  <p className="text-sm text-gray-500">{t.basic.colorRoles.description}</p>
+              <TabsContent value="accessibility" className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <Contrast className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.accessibility.contrastRatio.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line">
+                        {t.accessibility.contrastRatio.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Type className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.accessibility.textColor.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line">{t.accessibility.textColor.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Eye className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.accessibility.colorBlindness.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line">
+                        {t.accessibility.colorBlindness.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Type className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.accessibility.textPreview.title}</h3>
+                      <p className="text-sm text-gray-500">{t.accessibility.textPreview.description}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </TabsContent>
 
-              <div className="flex items-start gap-2">
-                <Sliders className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.basic.colorCount.title}</h3>
-                  <p className="text-sm text-gray-500">{t.basic.colorCount.description}</p>
+              <TabsContent value="advanced" className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <FileJson className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.advanced.importExport.title}</h3>
+                      <p className="text-sm text-gray-500">{t.advanced.importExport.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Code className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.advanced.codeExport.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line">{t.advanced.codeExport.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Wand2 className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.advanced.paletteOptimizer.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line">{t.advanced.paletteOptimizer.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Palette className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.advanced.colorMode.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line">{t.advanced.colorMode.description}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </TabsContent>
 
-              <div className="flex items-start gap-2">
-                <Save className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.basic.saveReset.title}</h3>
-                  <p className="text-sm text-gray-500">{t.basic.saveReset.description}</p>
+              <TabsContent value="color-theory" className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <Palette className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.colorTheory.oklab.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line">{t.colorTheory.oklab.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Lightbulb className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.colorTheory.harmony.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line">{t.colorTheory.harmony.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Wand2 className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                    <div>
+                      <h3 className="text-sm font-semibold">{t.colorTheory.roles.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line">{t.colorTheory.roles.description}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </TabsContent>
 
-              <div className="flex items-start gap-2">
-                <Palette className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.basic.colorPalette.title}</h3>
-                  <p className="text-sm text-gray-500">{t.basic.colorPalette.description}</p>
+              <TabsContent value="faq" className="space-y-4">
+                <div className="space-y-4">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                    <h3 className="text-sm font-semibold">{t.faq.saveQuestion.title}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{t.faq.saveQuestion.answer}</p>
+                  </div>
+
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                    <h3 className="text-sm font-semibold">{t.faq.accessibilityQuestion.title}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{t.faq.accessibilityQuestion.answer}</p>
+                  </div>
+
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                    <h3 className="text-sm font-semibold">{t.faq.variationsQuestion.title}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{t.faq.variationsQuestion.answer}</p>
+                  </div>
+
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                    <h3 className="text-sm font-semibold">{t.faq.modeQuestion.title}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{t.faq.modeQuestion.answer}</p>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </TabsContent>
+              </TabsContent>
+            </Tabs>
+          </BaseModalBody>
 
-          <TabsContent value="accessibility" className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <Contrast className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.accessibility.contrastRatio.title}</h3>
-                  <p className="text-sm text-gray-500 whitespace-pre-line">
-                    {t.accessibility.contrastRatio.description}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Type className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.accessibility.textColor.title}</h3>
-                  <p className="text-sm text-gray-500 whitespace-pre-line">{t.accessibility.textColor.description}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Eye className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.accessibility.colorBlindness.title}</h3>
-                  <p className="text-sm text-gray-500 whitespace-pre-line">
-                    {t.accessibility.colorBlindness.description}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Type className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.accessibility.textPreview.title}</h3>
-                  <p className="text-sm text-gray-500">{t.accessibility.textPreview.description}</p>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="advanced" className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <FileJson className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.advanced.importExport.title}</h3>
-                  <p className="text-sm text-gray-500">{t.advanced.importExport.description}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Code className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.advanced.codeExport.title}</h3>
-                  <p className="text-sm text-gray-500 whitespace-pre-line">{t.advanced.codeExport.description}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Wand2 className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.advanced.paletteOptimizer.title}</h3>
-                  <p className="text-sm text-gray-500 whitespace-pre-line">{t.advanced.paletteOptimizer.description}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Palette className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.advanced.colorMode.title}</h3>
-                  <p className="text-sm text-gray-500 whitespace-pre-line">{t.advanced.colorMode.description}</p>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="color-theory" className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <Palette className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.colorTheory.oklab.title}</h3>
-                  <p className="text-sm text-gray-500 whitespace-pre-line">{t.colorTheory.oklab.description}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Lightbulb className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.colorTheory.harmony.title}</h3>
-                  <p className="text-sm text-gray-500 whitespace-pre-line">{t.colorTheory.harmony.description}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Wand2 className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold">{t.colorTheory.roles.title}</h3>
-                  <p className="text-sm text-gray-500 whitespace-pre-line">{t.colorTheory.roles.description}</p>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="faq" className="space-y-4">
-            <div className="space-y-4">
-              <div className="p-3 bg-gray-50 rounded-md">
-                <h3 className="text-sm font-semibold">{t.faq.saveQuestion.title}</h3>
-                <p className="text-sm text-gray-500 mt-1">{t.faq.saveQuestion.answer}</p>
-              </div>
-
-              <div className="p-3 bg-gray-50 rounded-md">
-                <h3 className="text-sm font-semibold">{t.faq.accessibilityQuestion.title}</h3>
-                <p className="text-sm text-gray-500 mt-1">{t.faq.accessibilityQuestion.answer}</p>
-              </div>
-
-              <div className="p-3 bg-gray-50 rounded-md">
-                <h3 className="text-sm font-semibold">{t.faq.variationsQuestion.title}</h3>
-                <p className="text-sm text-gray-500 mt-1">{t.faq.variationsQuestion.answer}</p>
-              </div>
-
-              <div className="p-3 bg-gray-50 rounded-md">
-                <h3 className="text-sm font-semibold">{t.faq.modeQuestion.title}</h3>
-                <p className="text-sm text-gray-500 mt-1">{t.faq.modeQuestion.answer}</p>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        <DialogFooter>
-          {/* 7. 閉じるボタンのテキストを言語に応じて変更 */}
-          <Button onClick={close}>{t.close}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <BaseModalFooter>
+            {/* 7. 閉じるボタンのテキストを言語に応じて変更 */}
+            <Button onClick={close}>{t.close}</Button>
+          </BaseModalFooter>
+        </BaseModalContent>
+      </BaseModal>
+    </>
   )
 }

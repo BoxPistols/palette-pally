@@ -4,13 +4,14 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Tag, ArrowRight, GripVertical, ChevronUp, ChevronDown } from "lucide-react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+  BaseModal,
+  BaseModalContent,
+  BaseModalHeader,
+  BaseModalTitle,
+  BaseModalDescription,
+  BaseModalBody,
+  BaseModalFooter,
+} from "@/components/ui/base-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
@@ -235,16 +236,20 @@ export function ColorRoleSettings({ colors, onUpdateColors }: ColorRoleSettingsP
         <span>{t.button}</span>
       </Button>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-[700px] w-[90vw] max-h-[85vh] overflow-hidden flex flex-col">
-          <DialogHeader className="sticky top-0 bg-white z-20 pb-4 border-b">
-            <DialogTitle>{t.title}</DialogTitle>
-            <DialogDescription>{t.description}</DialogDescription>
-          </DialogHeader>
+      <BaseModal open={isOpen} onOpenChange={setIsOpen}>
+        <BaseModalContent
+          normalClassName="max-w-[700px] w-[90vw]"
+          fullscreenClassName="fixed inset-4 max-w-none translate-x-0 translate-y-0 left-0 top-0 flex flex-col"
+          className="flex flex-col"
+        >
+          <BaseModalHeader className="pb-4 border-b">
+            <BaseModalTitle>{t.title}</BaseModalTitle>
+            <BaseModalDescription>{t.description}</BaseModalDescription>
+          </BaseModalHeader>
 
-          <div className="py-4 space-y-4 overflow-auto flex-1">
-            <div className="p-3 bg-blue-50 rounded-md mb-4">
-              <p className="text-sm text-blue-700">
+          <BaseModalBody maxHeight="60vh" className="flex-1 py-4 space-y-4">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-md">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
                 <strong>{language === "jp" ? "ヒント:" : "Tip:"}</strong> {t.hint}
               </p>
             </div>
@@ -332,16 +337,16 @@ export function ColorRoleSettings({ colors, onUpdateColors }: ColorRoleSettingsP
                 )}
               </Droppable>
             </DragDropContext>
-          </div>
+          </BaseModalBody>
 
-          <DialogFooter className="sticky bottom-0 bg-white z-20 pt-4 border-t">
+          <BaseModalFooter className="pt-4 border-t">
             <Button variant="outline" onClick={() => setIsOpen(false)}>
               {t.cancel}
             </Button>
             <Button onClick={handleApply}>{t.apply}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </BaseModalFooter>
+        </BaseModalContent>
+      </BaseModal>
     </>
   )
 }

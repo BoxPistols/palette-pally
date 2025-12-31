@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { FullscreenModal } from "@/components/fullscreen-modal"
 import { useLanguage } from "@/contexts/language-context"
-import { Type, Maximize2, Minimize2 } from "lucide-react"
+import { Type } from "lucide-react"
 
 interface TextPreviewModalProps {
   color: string
@@ -13,7 +13,6 @@ interface TextPreviewModalProps {
 
 export function TextPreviewModal({ color, colorName }: TextPreviewModalProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
   const { language } = useLanguage()
 
   const backgrounds = [
@@ -88,37 +87,9 @@ export function TextPreviewModal({ color, colorName }: TextPreviewModalProps) {
         }
         open={isOpen}
         onOpenChange={setIsOpen}
+        showFooter
       >
-        <div className="flex justify-end mb-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="flex items-center gap-1"
-          >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            {language === "jp" ? "フルスクリーン切替" : "Toggle Fullscreen"}
-          </Button>
-        </div>
-
-        <div
-          className={`space-y-6 ${isFullscreen ? "fixed inset-0 z-50 bg-white dark:bg-gray-900 p-6 overflow-auto" : ""}`}
-        >
-          {isFullscreen && (
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">{language === "jp" ? "テキストプレビュー" : "Text Preview"}</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsFullscreen(false)}
-                className="flex items-center gap-1"
-              >
-                <Minimize2 className="h-4 w-4" />
-                {language === "jp" ? "フルスクリーン終了" : "Exit Fullscreen"}
-              </Button>
-            </div>
-          )}
-
+        <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {backgrounds.map((bg) => (
               <div key={bg.value} className="p-4 rounded-md" style={{ backgroundColor: bg.value, color: color }}>
