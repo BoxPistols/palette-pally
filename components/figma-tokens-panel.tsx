@@ -20,15 +20,14 @@ import {
 } from "@/lib/figma-token-parser"
 import { TypographyPreview } from "@/components/typography-preview"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
+  BaseModal,
+  BaseModalContent,
+  BaseModalHeader,
+  BaseModalTitle,
+  BaseModalDescription,
+  BaseModalBody,
+  BaseModalFooter,
+} from "@/components/ui/base-modal"
 
 interface FigmaTokensPanelProps {
   colors: ColorData[]
@@ -730,46 +729,42 @@ export function FigmaTokensPanel({ colors, variations, onImport, onTypographyImp
         </div>
       )}
 
-      {showPreview && (
-        <Dialog open={showPreview} onOpenChange={setShowPreview}>
-          <DialogContent className="max-w-[800px] max-h-[80vh] overflow-hidden flex flex-col">
-            <DialogHeader>
-              <DialogTitle>{language === "jp" ? "JSONプレビュー" : "JSON Preview"}</DialogTitle>
-              <DialogDescription>
-                {language === "jp"
-                  ? "エクスポートされるJSONデータのプレビュー"
-                  : "Preview of the JSON data to be exported"}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Figma Tokens Preview</h2>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleCopyJson} className="flex items-center gap-1">
-                  <Copy className="h-4 w-4" />
-                  {language === "jp" ? "コピー" : "Copy"}
-                </Button>
-                <Switch id="fullscreen-toggle" checked={isFullscreen} onCheckedChange={setIsFullscreen} />
-                <Label htmlFor="fullscreen-toggle">{language === "jp" ? "全画面" : "Fullscreen"}</Label>
-              </div>
-            </div>
-            <div
-              className={`${
-                isFullscreen ? "fixed inset-0 z-50 bg-background p-6 overflow-auto" : "max-h-[80vh] overflow-auto"
-              }`}
-            >
-              <pre className="text-xs font-mono whitespace-pre">
-                {JSON.stringify(convertColorsToFigmaTokens(getColorsWithVariations()), null, 2)}
-              </pre>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowPreview(false)}>
-                {language === "jp" ? "閉じる" : "Close"}
-              </Button>
-              <Button onClick={handleExport}>{language === "jp" ? "エクスポート" : "Export"}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+      <BaseModal open={showPreview} onOpenChange={setShowPreview}>
+        <BaseModalContent
+          normalClassName="max-w-[800px] w-[90vw]"
+          fullscreenClassName="fixed inset-4 max-w-none translate-x-0 translate-y-0 left-0 top-0 h-[calc(100vh-2rem)]"
+          className="flex flex-col"
+        >
+          <BaseModalHeader className="pb-4 border-b">
+            <BaseModalTitle>{language === "jp" ? "JSONプレビュー" : "JSON Preview"}</BaseModalTitle>
+            <BaseModalDescription>
+              {language === "jp"
+                ? "エクスポートされるJSONデータのプレビュー"
+                : "Preview of the JSON data to be exported"}
+            </BaseModalDescription>
+          </BaseModalHeader>
+
+          <div className="flex justify-end items-center py-2">
+            <Button variant="outline" size="sm" onClick={handleCopyJson} className="flex items-center gap-1">
+              <Copy className="h-4 w-4" />
+              {language === "jp" ? "コピー" : "Copy"}
+            </Button>
+          </div>
+
+          <BaseModalBody maxHeight="60vh" className="flex-1 min-h-0">
+            <pre className="text-xs font-mono whitespace-pre p-4 bg-gray-50 dark:bg-gray-800 rounded-md h-full overflow-auto">
+              {JSON.stringify(convertColorsToFigmaTokens(getColorsWithVariations()), null, 2)}
+            </pre>
+          </BaseModalBody>
+
+          <BaseModalFooter className="pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowPreview(false)}>
+              {language === "jp" ? "閉じる" : "Close"}
+            </Button>
+            <Button onClick={handleExport}>{language === "jp" ? "エクスポート" : "Export"}</Button>
+          </BaseModalFooter>
+        </BaseModalContent>
+      </BaseModal>
     </>
   )
 }
