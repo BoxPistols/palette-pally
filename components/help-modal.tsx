@@ -24,6 +24,9 @@ import {
   Tag,
   Eye,
   Code,
+  Layers,
+  Sun,
+  Moon,
 } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import { useModalState } from "@/hooks/use-modal-state"
@@ -38,6 +41,7 @@ const texts = {
     description: "カラーパレットの作成・管理・アクセシビリティチェックを簡単に行えるツールです",
     tabs: {
       basic: "基本機能",
+      frameworks: "フレームワーク",
       accessibility: "アクセシビリティ",
       advanced: "高度な機能",
       colorTheory: "色彩理論",
@@ -68,6 +72,39 @@ const texts = {
         title: "Color Palette",
         description:
           "右側のパネルには、各カラーの4つのバリエーション（main、dark、light、lighter）が表示されます。これらは自動的に生成され、コントラスト比とアクセシビリティレベルも確認できます。",
+      },
+    },
+    frameworks: {
+      title: "フレームワーク解説",
+      muiColorSystem: {
+        title: "Material UI のカラーシステム",
+        description:
+          "Material UI（MUI）は Google が提唱する Material Design を実装した React コンポーネントライブラリです。\n\n【カラーバリエーションの構造】\n各色には4つのバリエーションがあります：\n• main: 基本となる色。ボタンやリンクなど、最も頻繁に使用\n• dark: main より暗い色。ホバー状態やアクティブ状態に使用\n• light: main より明るい色。背景や無効状態に使用\n• lighter: さらに明るい色。薄い背景やハイライトに使用\n\n【なぜこの構造が必要？】\n一つの色だけでは、インタラクション（ホバー、クリック等）の視覚的フィードバックが表現できません。main を基準に dark/light を用意することで、状態変化を自然に表現できます。",
+      },
+      muiContrastText: {
+        title: "contrastText とは",
+        description:
+          "contrastText は、その背景色の上に配置するテキストの色です。\n\n【例】\n• 濃い青（#1976d2）の背景 → contrastText は白（#fff）\n• 薄い黄色（#fff59d）の背景 → contrastText は黒に近い色\n\n【自動計算の仕組み】\nこのツールでは、WCAG のコントラスト比基準に基づき、背景色に対して白と黒のどちらがより読みやすいかを自動判定しています。",
+      },
+      tailwindPhilosophy: {
+        title: "Tailwind CSS の思想",
+        description:
+          "Tailwind CSS は「ユーティリティファースト」という設計思想を持つ CSS フレームワークです。\n\n【ユーティリティファーストとは？】\n従来の CSS では「.button」のようなコンポーネント単位でスタイルを定義しますが、Tailwind では「bg-blue-500 text-white px-4」のように小さなユーティリティクラスを組み合わせてスタイリングします。\n\n【カラーパレットの構造】\n• 色名 + 数字（50〜950）で表現\n• 例: blue-500, gray-100, red-700\n• 数字が小さいほど明るく、大きいほど暗い\n• 500 が基準となる中間の明るさ",
+      },
+      tailwindUsage: {
+        title: "Tailwind カラークラスの使い方",
+        description:
+          "【よく使うクラス】\n• bg-{color}-{shade}: 背景色（例: bg-blue-500）\n• text-{color}-{shade}: テキスト色（例: text-gray-900）\n• border-{color}-{shade}: ボーダー色（例: border-red-300）\n\n【ダークモード対応】\n• dark:bg-gray-800 のように dark: プレフィックスを付けるとダークモード時のみ適用\n\n【このツールでの活用】\nカラーモードを「Tailwind CSS」に設定すると、作成した色に最も近い Tailwind のカラークラスが表示されます。",
+      },
+      designTokens: {
+        title: "デザイントークンとは",
+        description:
+          "デザイントークンは、色・フォント・余白などのデザイン値を一元管理する仕組みです。\n\n【メリット】\n• デザインの一貫性を保てる\n• 変更が一箇所で済む（例：ブランドカラー変更時）\n• デザイナーと開発者の共通言語になる\n\n【Figma との連携】\nこのツールの「Figma トークン」機能でエクスポートした JSON を Figma の Tokens Studio プラグインにインポートすると、デザインとコードで同じ色を共有できます。",
+      },
+      darkLightMode: {
+        title: "ライト/ダークモードの考え方",
+        description:
+          "モダンなアプリでは、ライトモードとダークモードの両方をサポートすることが一般的です。\n\n【このツールでの対応】\n• 各色に「ライト用」と「ダーク用」の2つの値を設定可能\n• ダーク用の値は自動生成（Auto Mode）または個別に設定可能\n• テーマを切り替えると、ColorPicker で編集する色も自動で切り替わる\n\n【設計のポイント】\n• ダークモードでは明度を反転させるのが基本\n• 彩度は少し下げた方が目に優しい\n• コントラスト比は両モードで確認が必要",
       },
     },
     accessibility: {
@@ -164,6 +201,7 @@ const texts = {
     description: "A tool for creating, managing, and checking accessibility of color palettes",
     tabs: {
       basic: "Basic",
+      frameworks: "Frameworks",
       accessibility: "Accessibility",
       advanced: "Advanced",
       colorTheory: "Color Theory",
@@ -195,6 +233,39 @@ const texts = {
         title: "Color Palette",
         description:
           "The right panel displays four variations (main, dark, light, lighter) for each color. These are automatically generated, and you can check the contrast ratio and accessibility level.",
+      },
+    },
+    frameworks: {
+      title: "Framework Guide",
+      muiColorSystem: {
+        title: "Material UI Color System",
+        description:
+          "Material UI (MUI) is a React component library implementing Google's Material Design.\n\n【Color Variation Structure】\nEach color has 4 variations:\n• main: The base color. Used for buttons, links, etc.\n• dark: Darker than main. Used for hover and active states\n• light: Lighter than main. Used for backgrounds and disabled states\n• lighter: Even lighter. Used for subtle backgrounds and highlights\n\n【Why This Structure?】\nA single color cannot express visual feedback for interactions (hover, click, etc.). Having dark/light variants based on main allows natural state transitions.",
+      },
+      muiContrastText: {
+        title: "What is contrastText?",
+        description:
+          "contrastText is the text color to be placed on that background color.\n\n【Examples】\n• Dark blue (#1976d2) background → contrastText is white (#fff)\n• Light yellow (#fff59d) background → contrastText is near-black\n\n【How Auto-calculation Works】\nThis tool automatically determines whether white or black text is more readable based on WCAG contrast ratio standards.",
+      },
+      tailwindPhilosophy: {
+        title: "Tailwind CSS Philosophy",
+        description:
+          "Tailwind CSS is a CSS framework with a 'utility-first' design philosophy.\n\n【What is Utility-First?】\nTraditional CSS defines styles per component like '.button', but Tailwind combines small utility classes like 'bg-blue-500 text-white px-4' for styling.\n\n【Color Palette Structure】\n• Color name + number (50-950)\n• Examples: blue-500, gray-100, red-700\n• Lower numbers are lighter, higher numbers are darker\n• 500 is the mid-range baseline",
+      },
+      tailwindUsage: {
+        title: "Using Tailwind Color Classes",
+        description:
+          "【Common Classes】\n• bg-{color}-{shade}: Background (e.g., bg-blue-500)\n• text-{color}-{shade}: Text color (e.g., text-gray-900)\n• border-{color}-{shade}: Border color (e.g., border-red-300)\n\n【Dark Mode】\n• Use dark: prefix like dark:bg-gray-800 for dark mode only\n\n【Using This Tool】\nSet color mode to 'Tailwind CSS' to see the closest Tailwind color class for each color you create.",
+      },
+      designTokens: {
+        title: "What are Design Tokens?",
+        description:
+          "Design tokens are a system for centrally managing design values like colors, fonts, and spacing.\n\n【Benefits】\n• Maintain design consistency\n• Changes only needed in one place (e.g., brand color change)\n• Creates a common language between designers and developers\n\n【Figma Integration】\nExport JSON from this tool's 'Figma Tokens' feature and import it into Figma's Tokens Studio plugin to share colors between design and code.",
+      },
+      darkLightMode: {
+        title: "Light/Dark Mode Concepts",
+        description:
+          "Modern apps commonly support both light and dark modes.\n\n【Support in This Tool】\n• Each color can have both 'light' and 'dark' values\n• Dark values can be auto-generated (Auto Mode) or set individually\n• Switching themes also switches which color the ColorPicker edits\n\n【Design Tips】\n• Dark mode typically inverts lightness\n• Slightly reduced saturation is easier on the eyes\n• Check contrast ratios in both modes",
       },
     },
     accessibility: {
@@ -325,6 +396,7 @@ export function HelpModal() {
               {/* 6. タブのテキストを言語に応じて変更 */}
               <TabsList className="flex w-full h-auto flex-wrap gap-1 mb-4">
                 <TabsTrigger value="basic" className="whitespace-nowrap">{t.tabs.basic}</TabsTrigger>
+                <TabsTrigger value="frameworks" className="whitespace-nowrap">{t.tabs.frameworks}</TabsTrigger>
                 <TabsTrigger value="accessibility" className="whitespace-nowrap">{t.tabs.accessibility}</TabsTrigger>
                 <TabsTrigger value="advanced" className="whitespace-nowrap">{t.tabs.advanced}</TabsTrigger>
                 <TabsTrigger value="color-theory" className="whitespace-nowrap">{t.tabs.colorTheory}</TabsTrigger>
@@ -370,6 +442,201 @@ export function HelpModal() {
                     <div>
                       <h3 className="text-sm font-semibold">{t.basic.colorPalette.title}</h3>
                       <p className="text-sm text-gray-500">{t.basic.colorPalette.description}</p>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="frameworks" className="space-y-4">
+                <div className="space-y-5">
+                  {/* MUI Color System */}
+                  <div className="flex items-start gap-2">
+                    <Layers className="h-5 w-5 mt-0.5 flex-shrink-0 text-purple-500" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold">{t.frameworks.muiColorSystem.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line mb-3">{t.frameworks.muiColorSystem.description}</p>
+                      {/* Visual Example: MUI Color Variations */}
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                        <p className="text-xs text-gray-400 mb-2">{language === "jp" ? "例: Primary カラー" : "Example: Primary Color"}</p>
+                        <div className="grid grid-cols-4 gap-2">
+                          <div className="text-center">
+                            <div className="h-12 rounded-md bg-[#0d47a1] flex items-center justify-center">
+                              <span className="text-white text-xs font-medium">dark</span>
+                            </div>
+                            <span className="text-[10px] text-gray-500 mt-1 block">#0d47a1</span>
+                          </div>
+                          <div className="text-center">
+                            <div className="h-12 rounded-md bg-[#1976d2] flex items-center justify-center ring-2 ring-purple-400">
+                              <span className="text-white text-xs font-medium">main</span>
+                            </div>
+                            <span className="text-[10px] text-gray-500 mt-1 block">#1976d2</span>
+                          </div>
+                          <div className="text-center">
+                            <div className="h-12 rounded-md bg-[#42a5f5] flex items-center justify-center">
+                              <span className="text-white text-xs font-medium">light</span>
+                            </div>
+                            <span className="text-[10px] text-gray-500 mt-1 block">#42a5f5</span>
+                          </div>
+                          <div className="text-center">
+                            <div className="h-12 rounded-md bg-[#bbdefb] flex items-center justify-center">
+                              <span className="text-gray-700 text-xs font-medium">lighter</span>
+                            </div>
+                            <span className="text-[10px] text-gray-500 mt-1 block">#bbdefb</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* contrastText */}
+                  <div className="flex items-start gap-2">
+                    <Contrast className="h-5 w-5 mt-0.5 flex-shrink-0 text-purple-500" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold">{t.frameworks.muiContrastText.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line mb-3">{t.frameworks.muiContrastText.description}</p>
+                      {/* Visual Example: contrastText */}
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                        <p className="text-xs text-gray-400 mb-2">{language === "jp" ? "背景色に応じたテキスト色" : "Text color based on background"}</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="h-14 rounded-md bg-[#1976d2] flex items-center justify-center">
+                            <span className="text-white text-sm font-medium">contrastText: #fff</span>
+                          </div>
+                          <div className="h-14 rounded-md bg-[#fff59d] flex items-center justify-center">
+                            <span className="text-gray-900 text-sm font-medium">contrastText: #000</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tailwind Philosophy */}
+                  <div className="flex items-start gap-2">
+                    <Code className="h-5 w-5 mt-0.5 flex-shrink-0 text-cyan-500" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold">{t.frameworks.tailwindPhilosophy.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line mb-3">{t.frameworks.tailwindPhilosophy.description}</p>
+                      {/* Visual Example: Tailwind Color Scale */}
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                        <p className="text-xs text-gray-400 mb-2">{language === "jp" ? "例: blue カラースケール" : "Example: blue color scale"}</p>
+                        <div className="flex gap-0.5">
+                          {[
+                            { shade: "50", color: "#eff6ff" },
+                            { shade: "100", color: "#dbeafe" },
+                            { shade: "200", color: "#bfdbfe" },
+                            { shade: "300", color: "#93c5fd" },
+                            { shade: "400", color: "#60a5fa" },
+                            { shade: "500", color: "#3b82f6" },
+                            { shade: "600", color: "#2563eb" },
+                            { shade: "700", color: "#1d4ed8" },
+                            { shade: "800", color: "#1e40af" },
+                            { shade: "900", color: "#1e3a8a" },
+                            { shade: "950", color: "#172554" },
+                          ].map((item) => (
+                            <div key={item.shade} className="flex-1 text-center">
+                              <div
+                                className="h-8 rounded-sm"
+                                style={{ backgroundColor: item.color }}
+                                title={`blue-${item.shade}`}
+                              />
+                              <span className="text-[8px] text-gray-500 mt-0.5 block">{item.shade}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tailwind Usage */}
+                  <div className="flex items-start gap-2">
+                    <Palette className="h-5 w-5 mt-0.5 flex-shrink-0 text-cyan-500" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold">{t.frameworks.tailwindUsage.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line mb-3">{t.frameworks.tailwindUsage.description}</p>
+                      {/* Visual Example: Tailwind Class Usage */}
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                        <p className="text-xs text-gray-400 mb-2">{language === "jp" ? "クラス適用例" : "Class application examples"}</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="px-3 py-1.5 bg-blue-500 text-white text-xs rounded">bg-blue-500</div>
+                            <span className="text-[10px] text-gray-500">{language === "jp" ? "背景色" : "Background"}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="px-3 py-1.5 bg-white dark:bg-gray-900 text-red-500 text-xs rounded border border-gray-200 dark:border-gray-700">text-red-500</div>
+                            <span className="text-[10px] text-gray-500">{language === "jp" ? "テキスト色" : "Text color"}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="px-3 py-1.5 bg-white dark:bg-gray-900 text-xs rounded border-2 border-green-500">border-green-500</div>
+                            <span className="text-[10px] text-gray-500">{language === "jp" ? "ボーダー色" : "Border color"}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Design Tokens */}
+                  <div className="flex items-start gap-2">
+                    <FileJson className="h-5 w-5 mt-0.5 flex-shrink-0 text-green-500" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold">{t.frameworks.designTokens.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line mb-3">{t.frameworks.designTokens.description}</p>
+                      {/* Visual Example: Design Tokens Flow */}
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                        <p className="text-xs text-gray-400 mb-2">{language === "jp" ? "デザイントークンのワークフロー" : "Design Token Workflow"}</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex-1 text-center p-2 bg-pink-100 dark:bg-pink-900/30 rounded-md">
+                            <span className="text-xs font-medium text-pink-700 dark:text-pink-300">Figma</span>
+                            <div className="text-[10px] text-pink-600 dark:text-pink-400 mt-0.5">{language === "jp" ? "デザイン" : "Design"}</div>
+                          </div>
+                          <div className="text-gray-400">→</div>
+                          <div className="flex-1 text-center p-2 bg-green-100 dark:bg-green-900/30 rounded-md">
+                            <span className="text-xs font-medium text-green-700 dark:text-green-300">JSON</span>
+                            <div className="text-[10px] text-green-600 dark:text-green-400 mt-0.5">{language === "jp" ? "トークン" : "Tokens"}</div>
+                          </div>
+                          <div className="text-gray-400">→</div>
+                          <div className="flex-1 text-center p-2 bg-blue-100 dark:bg-blue-900/30 rounded-md">
+                            <span className="text-xs font-medium text-blue-700 dark:text-blue-300">Code</span>
+                            <div className="text-[10px] text-blue-600 dark:text-blue-400 mt-0.5">{language === "jp" ? "開発" : "Development"}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Light/Dark Mode */}
+                  <div className="flex items-start gap-2">
+                    <div className="flex gap-0.5 mt-0.5 flex-shrink-0">
+                      <Sun className="h-4 w-4 text-yellow-500" />
+                      <Moon className="h-4 w-4 text-indigo-500" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold">{t.frameworks.darkLightMode.title}</h3>
+                      <p className="text-sm text-gray-500 whitespace-pre-line mb-3">{t.frameworks.darkLightMode.description}</p>
+                      {/* Visual Example: Light/Dark Mode Comparison */}
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                        <p className="text-xs text-gray-400 mb-2">{language === "jp" ? "同じ色のライト/ダーク表現" : "Same color in Light/Dark"}</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-white rounded-md p-3 border border-gray-200">
+                            <div className="flex items-center gap-1 mb-2">
+                              <Sun className="h-3 w-3 text-yellow-500" />
+                              <span className="text-[10px] text-gray-500">Light Mode</span>
+                            </div>
+                            <div className="h-8 rounded bg-[#1976d2] flex items-center justify-center">
+                              <span className="text-white text-xs">Primary</span>
+                            </div>
+                            <span className="text-[9px] text-gray-400 mt-1 block text-center">#1976d2</span>
+                          </div>
+                          <div className="bg-gray-900 rounded-md p-3 border border-gray-700">
+                            <div className="flex items-center gap-1 mb-2">
+                              <Moon className="h-3 w-3 text-indigo-400" />
+                              <span className="text-[10px] text-gray-400">Dark Mode</span>
+                            </div>
+                            <div className="h-8 rounded bg-[#90caf9] flex items-center justify-center">
+                              <span className="text-gray-900 text-xs">Primary</span>
+                            </div>
+                            <span className="text-[9px] text-gray-500 mt-1 block text-center">#90caf9</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
